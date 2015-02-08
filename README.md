@@ -18,9 +18,15 @@ Resulting text:
 [1] <a href="http://evankart.deviantart.com/art/Thranduil-419996946">http://evankart.deviantart.com/art/Thranduil-419996946</a>
 [2] <a href="http://evankart.deviantart.com/art/Thorin-Oakenshield-420365763">http://evankart.deviantart.com/art/Thorin-Oakenshield-420365763</a>
 [3] ... sassier</pre>
-_ _ _
+
+<br>
 
 The script assumes that
 * URLs surrounded by round brackets and
 * any other text surrounded by square brackets
 signify references that are to be turned into footnotes. Regular text surrounded by round brackets is left untouched.
+
+<br>
+<hr>
+
+This program, while mostly different in functionality, was in part motivated by [miniref](https://github.com/Lotterleben/miniref).
