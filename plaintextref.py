@@ -36,13 +36,13 @@ extension = extension.lower()
 
 if extension == ".txt":
     # code for text files goes here
-    print("text!")
+    print("text!") #debug only
 elif extension == (".htm" or ".html"):
     # code for HTML files goes here
-    print("html!")
+    print("html!") #debug only
 elif extension == ".md":
     # code for Markdown files goes here
-    print("markdown!")
+    print("markdown!") #debug only
 else:
     print("You did not specify a valid file name.\n"
         "Only .txt, .htm/.html and .md files can be converted.")
