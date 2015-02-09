@@ -30,35 +30,34 @@ import os
 import re
 from urllib.parse import urlparse
 from collections import OrderedDict
-# try:
-#     # Python3
-#     from urllib.parse import urlparse
-# except ImportError:
-#     # Python2
-#     from urlparse import urlparse
-
 
 def inspectbrackets(matchobj):
     global counter
     global references
-    brackets_round = matchobj.group(2)
-    brackets_square = matchobj.group(5)
-    if brackets_round is not None:
+    brkts_rd_o = matchobj.group(1)
+    brkts_rd_content = matchobj.group(2)
+    brkts_sq_content = matchobj.group(5)
+    # regex search found round brackets
+    if brkts_rd_content is not None:
         # make sure content of brackets consists only of URLs
         # check for attribute scheme (URL scheme specifier) at index 0
-        url = urlparse(brackets_round)
+        url = urlparse(brkts_rd_content)
         if url[0] is not '':
             counter += 1
-            references[counter] = brackets_round
+            references[counter] = brkts_rd_content
             ref = "[" + str(counter) + "]"
             return ref
+        # return original bracket content if it's not a URL
         else:
-            return "(" + brackets_round + ")"
-    elif brackets_square is not None:
+            return brkts_rd_o + brkts_rd_content + ")"
+    # regex search found square brackets    
+    elif brkts_sq_content is not None:
         counter += 1
         ref = "[" + str(counter) + "]"
-        references[counter] = brackets_square
+        references[counter] = brkts_sq_content
         return ref
+    # regex search did not find any brackets in this line
+    # use None to return the original line
     else:
         return None
 
@@ -70,9 +69,10 @@ extension = extension.lower()
 
 # number of first reference
 counter = 0
-brackets = []
+# create an order dictionary to store all references
 references = OrderedDict()
 
+# code for text files goes here
 if extension == ".txt":
     # read in the input file
     f = open(filename, 'r')
@@ -84,25 +84,27 @@ if extension == ".txt":
     for line in f:
         # search and substitute lines using regex
         # find all round and square brackets
-        # check for URLs in external function
+        # check for URLs in round brackets with external function
         line_out = re.sub("([ ]*[\(])([^\(\)]*)([\)])"
             "|([ ]*[\[])([^\[\]]*)([\]])", inspectbrackets, line)
 
-        # print new text
-        print(line_out, end="")
-
-    print("\n___")
-    # iterate over all references when done reading all lines
+        # write all lines (changed or unchanged) to output file
+        fout.write(line_out)
+    # separate footnotes from running text with separator
+    # use underscores i/st of dashes as -- often signal signatures in e-mails
+    fout.write("\n___\n")
+    # write references/bibliography to output file
     for no, ref in references.items():
-        print("[{}] {}" .format(no, ref)) #debug
+        fout.write("[{}] {}\n" .format(no, ref))
 
+    # close both the input and output file when done
     f.close()
     fout.close()
+# code for HTML files goes here
 elif extension == (".htm" or ".html"):
-    # code for HTML files goes here
     print("html!") #debug only
+# code for Markdown files goes here
 elif extension == ".md":
-    # code for Markdown files goes here
     print("markdown!") #debug only
 else:
     print("You did not specify a valid file name.\n"
