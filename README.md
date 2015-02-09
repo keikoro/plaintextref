@@ -8,9 +8,8 @@ A Python3 program which converts in-text references (citations, URLs) in
 
 Original text:
 
-<pre>Fans keep arguing over if Thranduil (<a href="http://evankart.deviantart.com/art/Thranduil-419996946">http://evankart.deviantart.com/art/Thranduil-419996946</a>) or Thorin (<a href="http://evankart.deviantart.com/art/Thorin-Oakenshield-420365763">http://evankart.deviantart.com/art/Thorin-Oakenshield-420365763</a>) makes the better [... sassier] king.</pre><br>See also [thth.txt](thth.txt)<br>
+<pre>Fans keep arguing over if Thranduil (<a href="http://evankart.deviantart.com/art/Thranduil-419996946">http://evankart.deviantart.com/art/Thranduil-419996946</a>) or Thorin (<a href="http://evankart.deviantart.com/art/Thorin-Oakenshield-420365763">http://evankart.deviantart.com/art/Thorin-Oakenshield-420365763</a>) makes the better [... sassier] king.</pre><br>See also [thth.txt](thth.txt)<br><br>
 
-<br>
 Resulting text:
 
 <pre>Fans keep arguing over if Thranduil[1] or Thorin[2] makes the better[3] king.<br>
@@ -34,8 +33,7 @@ Start the script by specifying which file you want to convert. The converted tex
 
 ```$ python3 plaintextref.py myfile.txt```
 
-... results in a new file called ```myfile_plaintext.txt
-```
+... results in a new file called ```myfile_plaintext.txt```
 
 
 ##Caveats
