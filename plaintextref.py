@@ -60,6 +60,8 @@ def inspectbrackets(matchobj):
 filename = sys.argv[-1]
 filename_base, extension = os.path.splitext(filename)
 extension = extension.lower()
+# create new file for plaintext output
+filename_out = filename_base + "_plaintext" + extension
 
 # number of first reference
 counter = 0
@@ -69,31 +71,24 @@ references = OrderedDict()
 # code for text files goes here
 if extension == ".txt":
     # read in the input file
-    f = open(filename, 'r')
-    # create new file for plaintext output
-    filename_out = filename_base + "_plaintext" + extension
-    fout = open(filename_out, 'w')
+    with open(filename, 'r', encoding='utf-8') as f:
+        with open(filename_out, 'w', encoding='utf-8') as fout:
+            # iterate over all lines
+            for line in f:
+                # search and substitute lines using regex
+                # find all round and square brackets
+                # check for URLs in round brackets with external function
+                line_out = re.sub("([ ]*[\(])([^\(\)]*)([\)])"
+                    "|([ ]*[\[])([^\[\]]*)([\]])", inspectbrackets, line)
 
-    # iterate over all lines
-    for line in f:
-        # search and substitute lines using regex
-        # find all round and square brackets
-        # check for URLs in round brackets with external function
-        line_out = re.sub("([ ]*[\(])([^\(\)]*)([\)])"
-            "|([ ]*[\[])([^\[\]]*)([\]])", inspectbrackets, line)
-
-        # write all lines (changed or unchanged) to output file
-        fout.write(line_out)
-    # separate footnotes from running text with separator
-    # use underscores i/st of dashes as -- often signal signatures in e-mails
-    fout.write("\n\n___\n")
-    # write references/bibliography to output file
-    for no, ref in references.items():
-        fout.write("[{}] {}\n" .format(no, ref))
-
-    # close both the input and output file when done
-    f.close()
-    fout.close()
+                # write all lines (changed or unchanged) to output file
+                fout.write(line_out)
+            # separate footnotes from running text with separator
+            # use underscores i/st of dashes as -- often signal signatures in e-mails
+            fout.write("\n\n___\n")
+            # write references/bibliography to output file
+            for no, ref in references.items():
+                fout.write("[{}] {}\n" .format(no, ref))
 # code for HTML files goes here
 elif extension == (".htm" or ".html"):
     print("html!") #debug only
