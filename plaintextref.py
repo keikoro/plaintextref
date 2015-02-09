@@ -37,7 +37,7 @@ from collections import OrderedDict
 #     # Python2
 #     from urlparse import urlparse
 
-# check file type of file input by user via cli
+# check file type of file input by user via CLI
 # + convert extension to lower case just in case
 filename = sys.argv[-1]
 filename_base, extension = os.path.splitext(filename)
@@ -49,8 +49,11 @@ brackets = []
 references = OrderedDict()
 
 if extension == ".txt":
-    # read in the file
+    # read in the input file
     f = open(filename, 'r')
+    # create new file for plaintext output
+    filename_out = filename_base + "_plaintext" + extension
+    fout = open(filename_out, 'w')
 
     # iterate over all lines
     for line in f:
@@ -82,6 +85,7 @@ if extension == ".txt":
         print("[{}] {}" .format(no, ref)) #debug
 
     f.close()
+    fout.close()
 elif extension == (".htm" or ".html"):
     # code for HTML files goes here
     print("html!") #debug only
