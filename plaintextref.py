@@ -28,12 +28,14 @@
 import sys
 import os
 import re
-try:
-    # Python3
-    from urllib.parse import urlparse
-except ImportError:
-    # Python2
-    from urlparse import urlparse
+from urllib.parse import urlparse
+from collections import OrderedDict
+# try:
+#     # Python3
+#     from urllib.parse import urlparse
+# except ImportError:
+#     # Python2
+#     from urlparse import urlparse
 
 # check file type of file input by user via cli
 # + convert extension to lower case just in case
@@ -44,6 +46,7 @@ extension = extension.lower()
 # number of first reference
 counter = 1
 brackets = []
+references = OrderedDict()
 
 if extension == ".txt":
     # read in the file
@@ -57,22 +60,22 @@ if extension == ".txt":
         brackets.extend(re.finditer("([ ]*[\(])([^\(\)]*)([\)])"
             "|([ ]*[\[])([^\[\]]*)([\]])", line))
 
+    # inspect all brackets found
     for reference in brackets:
-        # all references
-        # re_group = 0
-        # if reference.group(re_group) is not None:
-        #     print("found {} group {} {}" .format(counter, re_group, reference.group(re_group))) #debug
-
-        # references in round brackets
+        # inspect references in round brackets
         brackets_round = reference.group(2)
         if brackets_round is not None:
+            # make sure content of brackets consists only of URLs
+            # check for attribute scheme (URL scheme specifier) at index 0
             url = urlparse(brackets_round)
             if url[0] is not '':
+                references[counter] = brackets_round
                 print("found {}: {}" .format(counter, brackets_round)) #debug
                 counter += 1
-        # references in square brackets
+        # use all references square brackets
         brackets_square = reference.group(5)
         if brackets_square is not None:
+            references[counter] = brackets_square
             print("found {}: {}" .format(counter, brackets_square)) #debug
             counter += 1
 
