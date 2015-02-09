@@ -44,6 +44,7 @@ extension = extension.lower()
 
 # number of first reference
 counter = 1
+brackets = []
 
 if extension == ".txt":
     # read in the file
@@ -52,17 +53,28 @@ if extension == ".txt":
     # iterate over all lines
     for line in f:
         # search lines using regex
-
-        # find all round brackets
+        # find all round and square brackets
         # TODO: find only round brackets containing URLs
-        brackets = re.findall("([ ]*[\(])([^\(\)]+)([\)])", line)
-        # find all square brackets
-        # brackets = re.findall("([ ]*[\[])([^\[\]]+)([\]])", line)
+        brackets.extend(re.finditer("([ ]*[\(])([^\(\)]*)([\)])"
+            "|([ ]*[\[])([^\[\]]*)([\]])", line))
 
-        for reference in brackets:
-            print("found {} {}" .format(counter, reference)) #debug
-            counter += 1
+    for reference in brackets:
+        # all references
+        # re_group = 0
+        # if reference.group(re_group) is not None:
+        #     print("found {} group {} {}" .format(counter, re_group, reference.group(re_group))) #debug
 
+        # references in round brackets
+        re_group = 2
+        if reference.group(re_group) is not None:
+            print("found {} group {} {}" .format(counter, 
+                re_group, reference.group(re_group))) #debug
+        # references in square brackets
+        re_group = 5
+        if reference.group(re_group) is not None:
+            print("found {} group {} {}" .format(counter, 
+                re_group, reference.group(re_group))) #debug
+        counter += 1
     f.close()
 elif extension == (".htm" or ".html"):
     # code for HTML files goes here
