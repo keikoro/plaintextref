@@ -70,13 +70,11 @@ if extension == ".txt":
             url = urlparse(brackets_round)
             if url[0] is not '':
                 references[counter] = brackets_round
-                print("found {}: {}" .format(counter, brackets_round)) #debug
                 counter += 1
         # use all references square brackets
         brackets_square = reference.group(5)
         if brackets_square is not None:
             references[counter] = brackets_square
-            print("found {}: {}" .format(counter, brackets_square)) #debug
             counter += 1
 
     # iterate over all references when done reading all lines
