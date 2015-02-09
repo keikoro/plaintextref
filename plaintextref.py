@@ -28,7 +28,6 @@
 import sys
 import os
 import re
-
 try:
     # Python3
     from urllib.parse import urlparse
@@ -65,16 +64,18 @@ if extension == ".txt":
         #     print("found {} group {} {}" .format(counter, re_group, reference.group(re_group))) #debug
 
         # references in round brackets
-        re_group = 2
-        if reference.group(re_group) is not None:
-            print("found {} group {} {}" .format(counter, 
-                re_group, reference.group(re_group))) #debug
+        brackets_round = reference.group(2)
+        if brackets_round is not None:
+            url = urlparse(brackets_round)
+            if url[0] is not '':
+                print("found {}: {}" .format(counter, brackets_round)) #debug
+                counter += 1
         # references in square brackets
-        re_group = 5
-        if reference.group(re_group) is not None:
-            print("found {} group {} {}" .format(counter, 
-                re_group, reference.group(re_group))) #debug
-        counter += 1
+        brackets_square = reference.group(5)
+        if brackets_square is not None:
+            print("found {}: {}" .format(counter, brackets_square)) #debug
+            counter += 1
+
     f.close()
 elif extension == (".htm" or ".html"):
     # code for HTML files goes here
