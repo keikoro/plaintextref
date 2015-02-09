@@ -1,29 +1,23 @@
 #! /usr/bin/env python3
 
-# TODO
-# 
-# check file type of file input via cli
-# differentiate between:
-#   plain text (.txt)
-#   HTML (.htm, .html)
-#   Markdown (.md)
+# Convert in-text references (URLs) to sequentially numbered footnotes.
 #
-# loop through all lines of the file
-# search for occurrences of brackets in each line
-# use round brackets only if they contain URLs of any kind (://)
-# use all square brackets
+# Copyright (c) 2015 K Kollmann <code∆k.kollmann·moe>
+# License: http://opensource.org/licenses/MIT The MIT License (MIT)
 #
-# remove any whitespace preceding the brackets
-# replace each pair of brackets with [i]
-# where i is a counter that gets incremented
+# You need to have Python 3.x installed to run this script.
+# Run by opening the file containing the text you wish to convert.
+# The output gets saved to a new file whose name has _plaintext
+# appended to the original filename.
+# e.g.
+# $ python3 plaintextref.py myfile.txt
+# results in:
+# myfile_plaintext.txt
 #
-# save contents of brackets in a dictionary (?) 
-# with counter variable serving as key
-#
-# add two new lines at end of file
-# and output the dictionary sorted by keys (ascending)
-# like so: [key] dictionarycontent
-#
+# The script currently only supports conversion of .txt files.
+# Round brackets containing URLs and all square brackets get converted
+# to footnotes. Round brackets containing other text (including nested
+# brackets, round or square) are ignored.
 
 import sys
 import os
