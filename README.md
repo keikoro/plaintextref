@@ -30,7 +30,7 @@ Another intended purpose of this program is the conversion of HTML-formatted e-m
 
 ## Usage
 
-Start the script by specifying which file you want to convert. The converted text is saved to a new file which has ```_plaintextref``` appended to the original file name. Save location is the folder containing the original file.
+Start the script by specifying which file you want to convert. The converted text is saved to a new file which has ```_plaintext``` appended to the original file name. Save location is the folder containing the original file.
 
 ```$ python3 plaintextref.py myfile.txt```
 
