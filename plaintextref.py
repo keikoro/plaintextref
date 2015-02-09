@@ -86,7 +86,7 @@ if extension == ".txt":
         fout.write(line_out)
     # separate footnotes from running text with separator
     # use underscores i/st of dashes as -- often signal signatures in e-mails
-    fout.write("\n___\n")
+    fout.write("\n\n___\n")
     # write references/bibliography to output file
     for no, ref in references.items():
         fout.write("[{}] {}\n" .format(no, ref))
