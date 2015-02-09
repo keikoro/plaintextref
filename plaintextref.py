@@ -37,6 +37,31 @@ from collections import OrderedDict
 #     # Python2
 #     from urlparse import urlparse
 
+
+def inspectbrackets(matchobj):
+    global counter
+    global references
+    brackets_round = matchobj.group(2)
+    brackets_square = matchobj.group(5)
+    if brackets_round is not None:
+        # make sure content of brackets consists only of URLs
+        # check for attribute scheme (URL scheme specifier) at index 0
+        url = urlparse(brackets_round)
+        if url[0] is not '':
+            counter += 1
+            references[counter] = brackets_round
+            ref = "[" + str(counter) + "]"
+            return ref
+        else:
+            return "(" + brackets_round + ")"
+    elif brackets_square is not None:
+        counter += 1
+        ref = "[" + str(counter) + "]"
+        references[counter] = brackets_square
+        return ref
+    else:
+        return None
+
 # check file type of file input by user via CLI
 # + convert extension to lower case just in case
 filename = sys.argv[-1]
@@ -44,7 +69,7 @@ filename_base, extension = os.path.splitext(filename)
 extension = extension.lower()
 
 # number of first reference
-counter = 1
+counter = 0
 brackets = []
 references = OrderedDict()
 
@@ -57,29 +82,16 @@ if extension == ".txt":
 
     # iterate over all lines
     for line in f:
-        # search lines using regex
+        # search and substitute lines using regex
         # find all round and square brackets
-        # TODO: find only round brackets containing URLs
-        brackets.extend(re.finditer("([ ]*[\(])([^\(\)]*)([\)])"
-            "|([ ]*[\[])([^\[\]]*)([\]])", line))
+        # check for URLs in external function
+        line_out = re.sub("([ ]*[\(])([^\(\)]*)([\)])"
+            "|([ ]*[\[])([^\[\]]*)([\]])", inspectbrackets, line)
 
-    # inspect all brackets found
-    for reference in brackets:
-        # inspect references in round brackets
-        brackets_round = reference.group(2)
-        if brackets_round is not None:
-            # make sure content of brackets consists only of URLs
-            # check for attribute scheme (URL scheme specifier) at index 0
-            url = urlparse(brackets_round)
-            if url[0] is not '':
-                references[counter] = brackets_round
-                counter += 1
-        # use all references square brackets
-        brackets_square = reference.group(5)
-        if brackets_square is not None:
-            references[counter] = brackets_square
-            counter += 1
+        # print new text
+        print(line_out, end="")
 
+    print("\n___")
     # iterate over all references when done reading all lines
     for no, ref in references.items():
         print("[{}] {}" .format(no, ref)) #debug
