@@ -25,18 +25,32 @@
 # like so: [key] dictionarycontent
 #
 
-import fileinput
 import sys
 import os
+import re
 
 # check file type of file input by user via cli
 # + convert extension to lower case just in case
-filename, extension = os.path.splitext(sys.argv[-1])
+filename = sys.argv[-1]
+filename_base, extension = os.path.splitext(filename)
 extension = extension.lower()
 
+# number of first reference
+counter = 1
+
 if extension == ".txt":
-    # code for text files goes here
-    print("text!") #debug only
+    # read in the file
+    f = open(filename, 'r')
+
+    # iterate over all lines
+    for line in f:
+        # search lines using regex
+        # look for opening brackets ( [
+        brackets = re.findall("[\(\[]", line)
+        for reference in brackets:
+            print("found {}" .format(counter)) #debug
+            counter += 1
+
 elif extension == (".htm" or ".html"):
     # code for HTML files goes here
     print("html!") #debug only
