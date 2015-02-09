@@ -79,6 +79,10 @@ if extension == ".txt":
             print("found {}: {}" .format(counter, brackets_square)) #debug
             counter += 1
 
+    # iterate over all references when done reading all lines
+    for no, ref in references.items():
+        print("[{}] {}" .format(no, ref)) #debug
+
     f.close()
 elif extension == (".htm" or ".html"):
     # code for HTML files goes here
