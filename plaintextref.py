@@ -29,6 +29,13 @@ import sys
 import os
 import re
 
+try:
+    # Python3
+    from urllib.parse import urlparse
+except ImportError:
+    # Python2
+    from urlparse import urlparse
+
 # check file type of file input by user via cli
 # + convert extension to lower case just in case
 filename = sys.argv[-1]
@@ -37,6 +44,7 @@ extension = extension.lower()
 
 # number of first reference
 counter = 1
+lines = 1
 
 if extension == ".txt":
     # read in the file
@@ -44,13 +52,20 @@ if extension == ".txt":
 
     # iterate over all lines
     for line in f:
+        lines += 2
         # search lines using regex
-        # look for opening brackets ( [
-        brackets = re.findall("[\(\[]", line)
+
+        # find all round brackets
+        # TODO: find only round brackets containing URLs
+        brackets = re.findall("([ ]+[\(])([^\(\)]+)([\)])", line)
+        # find all square brackets
+        # brackets = re.findall("([ ]+[\[])([^\[\]]+)([\]])", line)
+
         for reference in brackets:
-            print("found {}" .format(counter)) #debug
+            print("found {} {}" .format(counter, reference)) #debug
             counter += 1
 
+    f.close()
 elif extension == (".htm" or ".html"):
     # code for HTML files goes here
     print("html!") #debug only
