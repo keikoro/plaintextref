@@ -29,7 +29,6 @@ def inspectbrackets(matchobj):
     global counter
     global references
     fullref = matchobj.group(0)
-    brkts_rd_o = matchobj.group('rd_o')
     brkts_rd_content = matchobj.group('rd')
     brkts_sq_inquote = matchobj.group('sq_qu_reg')
     brkts_sq_inquote_2 = matchobj.group('sq_qu_form')
@@ -46,15 +45,18 @@ def inspectbrackets(matchobj):
             return ref
         # return original bracket content if it's not a URL
         else:
-            return brkts_rd_o + brkts_rd_content + ")"
+            return fullref
     # regex search found square brackets    
     elif brkts_sq_inquote is not None or brkts_sq_inquote_2 is not None:
         return fullref
     elif brkts_sq_content is not None:
-        counter += 1
-        ref = "[" + str(counter) + "]"
-        references[counter] = brkts_sq_content
-        return ref
+        if brkts_sq_content != 'sic' and brkts_sq_content != 'sic!':
+            counter += 1
+            ref = "[" + str(counter) + "]"
+            references[counter] = brkts_sq_content
+            return ref
+        else:
+            return fullref
     # regex search did not find any brackets in this line
     # use None to return the original line
     else:
@@ -86,7 +88,7 @@ if extension == ".txt":
 
                 line_out = re.sub(""
                     "(?#check for round brackets)"
-                    "(?P<rd_o>[ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
+                    "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
                     "(?#check for square brackets inside regular quotation marks)"
                     "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
                     "(?#check for square brackets inside formatted quotation marks)"
