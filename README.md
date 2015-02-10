@@ -40,16 +40,12 @@ Start the script by specifying which file you want to convert. The converted tex
 ##Caveats
 
 The program assumes that
-* URLs surrounded by round brackets and
+* round brackets whose contents begin with a URL and
 * any other text surrounded by square brackets
 <br>
 signify references that are to be turned into footnotes.
 
-Other text surrounded by round brackets (including nested brackets, round or square) is left untouched.
-
-###Needs fixing
-Ignore square brackets which are part of citations, used to modify the original quote (to clarify, for translations, to indicate a change in capitalisation etc.) as well as square brackets denoting errors (starting with *sic*).
-
+Other text surrounded by round brackets (including any kind of nested brackets) is left untouched. Also ignored are square brackets denoting errors (```[sic]``` or ```[sic!]```) and square brackets indicating modified quotes *if* they are inside double quotation marks (```"Could you tell the [other dwarves] I said goodbye?"```).
 <br>
 
 The script currently only supports the conversion of **text files**. Adding support for **HTML** and **Markdown files** will be the next steps.
