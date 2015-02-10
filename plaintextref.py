@@ -28,15 +28,18 @@ from collections import OrderedDict
 def inspectbrackets(matchobj):
     global counter
     global references
-    brkts_rd_o = matchobj.group(1)
-    brkts_rd_content = matchobj.group(2)
-    brkts_sq_content = matchobj.group(5)
+    fullref = matchobj.group(0)
+    brkts_rd_o = matchobj.group('rd_o')
+    brkts_rd_content = matchobj.group('rd')
+    brkts_sq_inquote = matchobj.group('sq_qu_reg')
+    brkts_sq_inquote_2 = matchobj.group('sq_qu_form')
+    brkts_sq_content = matchobj.group('sq')
     # regex search found round brackets
     if brkts_rd_content is not None:
         # make sure content of brackets consists only of URLs
         # check for attribute scheme (URL scheme specifier) at index 0
         url = urlparse(brkts_rd_content)
-        if url[0] is not '':
+        if url[0] is not '' and url[1] is not '':
             counter += 1
             references[counter] = brkts_rd_content
             ref = "[" + str(counter) + "]"
@@ -45,6 +48,8 @@ def inspectbrackets(matchobj):
         else:
             return brkts_rd_o + brkts_rd_content + ")"
     # regex search found square brackets    
+    elif brkts_sq_inquote is not None or brkts_sq_inquote_2 is not None:
+        return fullref
     elif brkts_sq_content is not None:
         counter += 1
         ref = "[" + str(counter) + "]"
@@ -53,7 +58,7 @@ def inspectbrackets(matchobj):
     # regex search did not find any brackets in this line
     # use None to return the original line
     else:
-        return None
+        return fullref
 
 # check file type of file input by user via CLI
 # + convert extension to lower case just in case
@@ -78,14 +83,24 @@ if extension == ".txt":
                 # search and substitute lines using regex
                 # find all round and square brackets
                 # check for URLs in round brackets with external function
-                line_out = re.sub("([ ]*[\(])([^\(\)]*)([\)])"
-                    "|([ ]*[\[])([^\[\]]*)([\]])", inspectbrackets, line)
+
+                line_out = re.sub(""
+                    "(?#check for round brackets)"
+                    "(?P<rd_o>[ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
+                    "(?#check for square brackets inside regular quotation marks)"
+                    "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
+                    "(?#check for square brackets inside formatted quotation marks)"
+                    "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
+                    "(?#check for square brackets)"
+                    "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
+                        inspectbrackets, line)
 
                 # write all lines (changed or unchanged) to output file
                 fout.write(line_out)
-            # separate footnotes from running text with separator
-            # use underscores i/st of dashes as -- often signal signatures in e-mails
-            fout.write("\n\n___\n")
+            # if there are footnotes: separate them with separator
+            # use _ not dashes as -- often signals signatures in e-mails
+            if len(references) > 0:
+                fout.write("\n\n___\n")
             # write references/bibliography to output file
             for no, ref in references.items():
                 fout.write("[{}] {}\n" .format(no, ref))
