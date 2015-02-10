@@ -84,8 +84,9 @@ if extension == ".txt":
             for line in f:
                 # search and substitute lines using regex
                 # find all round and square brackets
-                # check for URLs in round brackets with external function
-
+                # check bracket contents with external function
+                # TODO check for different (faux) quotation mark characters
+                # see http://unicode.org/cldr/utility/confusables.jsp?a=%22&r=None
                 line_out = re.sub(""
                     "(?#check for round brackets)"
                     "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
