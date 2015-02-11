@@ -69,7 +69,7 @@ def inspectbrackets(matchobj):
 
 def writeappendix():
     global references
-    # separate footnotes with separator; use _ instead of dashes
+    # separate footnotes with separator. use _ instead of dashes
     # as -- is read as the beginning of a signature by e-mail clients
     fout.write("___\n")
     # write references/bibliography to output file
@@ -91,49 +91,47 @@ counter = 0
 # check existence of signature
 signature = 0
 
-# code for text files goes here
-if extension == ".txt":
-    # read in the input file
-    with open(filename, 'r', encoding='utf-8') as f:
-        with open(filename_out, 'w', encoding='utf-8') as fout:
-            # iterate over all lines
-            for line in f:
-                # if the current line does not mark an e-mail signature
-                if line != "--\n":
-                    # search and substitute lines using regex
-                    # find all round and square brackets
-                    # check bracket contents with external function
-                    # TODO check for different (faux) quotation mark characters
-                    # see http://unicode.org/cldr/utility/confusables.jsp?a=%22&r=None
-                    line_out = re.sub(""
-                        "(?#check for round brackets)"
-                        "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
-                        "(?#check for square brackets inside regular quotation marks)"
-                        "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
-                        "(?#check for square brackets inside formatted quotation marks)"
-                        "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
-                        "(?#check for square brackets)"
-                        "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
-                            inspectbrackets, line)
-                    # write back all lines (changed or unchanged)
-                    fout.write(line_out)
-                # include appendix before e-mail signature
-                # if the current line marks such a signature (--)
-                else:
-                    signature = 1
-                    if len(references) > 0:
-                        writeappendix()
-                    fout.write("\n" +line)
-            # include appendix at end if no signature was found
-            if signature == 0 and len(references) > 0:
-                fout.write("\n\n")
-                writeappendix()
-# code for HTML files goes here
-elif extension == (".htm" or ".html"):
-    print("html!") #debug only
-# code for Markdown files goes here
-elif extension == ".md":
-    print("markdown!") #debug only
+# validate file exists
+if os.path.isfile(filename) is True:
+    # program can only convert text files
+    # TODO: add support for .htm/.html and .md files
+    if extension == ".txt":
+        with open(filename, 'r', encoding='utf-8') as f:
+            with open(filename_out, 'w', encoding='utf-8') as fout:
+                # iterate over all lines
+                for line in f:
+                    # if the current line does not mark an e-mail signature
+                    if line != "--\n":
+                        # search and substitute lines using regex
+                        # find all round and square brackets
+                        # find all square brackets within quotes
+                        line_out = re.sub(""
+                            "(?#check for round brackets)"
+                            "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
+                            "(?#check for square brackets inside regular quotation marks)"
+                            "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
+                            "(?#check for square brackets inside formatted quotation marks)"
+                            "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
+                            "(?#check for square brackets)"
+                            "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
+                                inspectbrackets, line)
+                        # write back all lines (changed or unchanged)
+                        fout.write(line_out)
+                    # include appendix before e-mail signature
+                    # if the current line marks such a signature (--)
+                    else:
+                        signature = 1
+                        if len(references) > 0:
+                            writeappendix()
+                        fout.write("\n" +line)
+                # include appendix at end if no signature was found
+                if signature == 0 and len(references) > 0:
+                    fout.write("\n\n")
+                    writeappendix()
+    # other file type than .txt was used
+    else:
+        print("You did not specify a valid file name.\n"
+        "Only .txt, .htm/.html and .md files can be converted.")      
+# file does not exist
 else:
-    print("You did not specify a valid file name.\n"
-        "Only .txt, .htm/.html and .md files can be converted.")
+    print("You did not specify a valid file name.\n")
