@@ -19,6 +19,11 @@
 # to footnotes. Round brackets containing other text (including nested
 # brackets, round or square) are ignored.
 
+# TODO:
+# check for existence of marker for e-mail signatures
+# (two dashes followed by a newline)
+# add appendix before signature
+
 import sys
 import os
 import re
