@@ -69,13 +69,12 @@ def inspectbrackets(matchobj):
 
 def writeappendix():
     global references
-    # if there are footnotes: separate them with separator
-    # use _ not dashes as -- often signals signatures in e-mails
-    if len(references) > 0:
-        fout.write("___\n")
-        # write references/bibliography to output file
-        for no, ref in references.items():
-            fout.write("[{}] {}\n" .format(no, ref))
+    # separate footnotes with separator; use _ instead of dashes
+    # as -- is read as the beginning of a signature by e-mail clients
+    fout.write("___\n")
+    # write references/bibliography to output file
+    for no, ref in references.items():
+        fout.write("[{}] {}\n" .format(no, ref))
 
 # check file type of file input by user via CLI
 # + convert extension to lower case just in case
@@ -116,7 +115,7 @@ if extension == ".txt":
                         "(?#check for square brackets)"
                         "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
                             inspectbrackets, line)
-                    # write all lines (changed or unchanged) to output file
+                    # write back all lines (changed or unchanged)
                     fout.write(line_out)
                 # include the appendix before the signature
                 # if the current line marks an e-mail signature (--)
