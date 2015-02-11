@@ -117,14 +117,15 @@ if extension == ".txt":
                             inspectbrackets, line)
                     # write back all lines (changed or unchanged)
                     fout.write(line_out)
-                # include the appendix before the signature
-                # if the current line marks an e-mail signature (--)
+                # include appendix before e-mail signature
+                # if the current line marks such a signature (--)
                 else:
                     signature = 1
                     if len(references) > 0:
                         writeappendix()
                     fout.write("\n" +line)
-            if signature != 1 and len(references) > 0:
+            # include appendix at end if no signature was found
+            if signature == 0 and len(references) > 0:
                 fout.write("\n\n")
                 writeappendix()
 # code for HTML files goes here
