@@ -84,11 +84,11 @@ extension = extension.lower()
 # create new file for plaintext output
 filename_out = filename_base + "_plaintext" + extension
 
-# number of first reference
-counter = 0
-# create an order dictionary to store all references
+# create an ordered dictionary to store all references
+# initialise counter for references
 references = OrderedDict()
-# counter for signature
+counter = 0
+# check existence of signature
 signature = 0
 
 # code for text files goes here
