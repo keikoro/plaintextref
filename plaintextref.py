@@ -101,11 +101,11 @@ if extension == ".txt":
             for line in f:
                 # if the current line does not mark an e-mail signature
                 if line != "--\n":
-                # search and substitute lines using regex
-                # find all round and square brackets
-                # check bracket contents with external function
-                # TODO check for different (faux) quotation mark characters
-                # see http://unicode.org/cldr/utility/confusables.jsp?a=%22&r=None
+                    # search and substitute lines using regex
+                    # find all round and square brackets
+                    # check bracket contents with external function
+                    # TODO check for different (faux) quotation mark characters
+                    # see http://unicode.org/cldr/utility/confusables.jsp?a=%22&r=None
                     line_out = re.sub(""
                         "(?#check for round brackets)"
                         "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
