@@ -67,6 +67,16 @@ def inspectbrackets(matchobj):
     else:
         return fullref
 
+def writeappendix():
+    global references
+    # if there are footnotes: separate them with separator
+    # use _ not dashes as -- often signals signatures in e-mails
+    if len(references) > 0:
+        fout.write("___\n")
+        # write references/bibliography to output file
+        for no, ref in references.items():
+            fout.write("[{}] {}\n" .format(no, ref))
+
 # check file type of file input by user via CLI
 # + convert extension to lower case just in case
 filename = sys.argv[-1]
@@ -79,6 +89,8 @@ filename_out = filename_base + "_plaintext" + extension
 counter = 0
 # create an order dictionary to store all references
 references = OrderedDict()
+# counter for signature
+signature = 0
 
 # code for text files goes here
 if extension == ".txt":
@@ -87,31 +99,35 @@ if extension == ".txt":
         with open(filename_out, 'w', encoding='utf-8') as fout:
             # iterate over all lines
             for line in f:
+                # if the current line does not mark an e-mail signature
+                if line != "--\n":
                 # search and substitute lines using regex
                 # find all round and square brackets
                 # check bracket contents with external function
                 # TODO check for different (faux) quotation mark characters
                 # see http://unicode.org/cldr/utility/confusables.jsp?a=%22&r=None
-                line_out = re.sub(""
-                    "(?#check for round brackets)"
-                    "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
-                    "(?#check for square brackets inside regular quotation marks)"
-                    "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
-                    "(?#check for square brackets inside formatted quotation marks)"
-                    "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
-                    "(?#check for square brackets)"
-                    "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
-                        inspectbrackets, line)
-
-                # write all lines (changed or unchanged) to output file
-                fout.write(line_out)
-            # if there are footnotes: separate them with separator
-            # use _ not dashes as -- often signals signatures in e-mails
-            if len(references) > 0:
-                fout.write("\n\n___\n")
-            # write references/bibliography to output file
-            for no, ref in references.items():
-                fout.write("[{}] {}\n" .format(no, ref))
+                    line_out = re.sub(""
+                        "(?#check for round brackets)"
+                        "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
+                        "(?#check for square brackets inside regular quotation marks)"
+                        "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
+                        "(?#check for square brackets inside formatted quotation marks)"
+                        "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
+                        "(?#check for square brackets)"
+                        "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
+                            inspectbrackets, line)
+                    # write all lines (changed or unchanged) to output file
+                    fout.write(line_out)
+                # include the appendix before the signature
+                # if the current line marks an e-mail signature (--)
+                else:
+                    signature = 1
+                    if len(references) > 0:
+                        writeappendix()
+                    fout.write("\n" +line)
+            if signature != 1 and len(references) > 0:
+                fout.write("\n\n")
+                writeappendix()
 # code for HTML files goes here
 elif extension == (".htm" or ".html"):
     print("html!") #debug only
