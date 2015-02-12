@@ -66,6 +66,8 @@ def inspectbrackets(matchobj):
         return fullref
 
 def writeappendix():
+    """Write an appendix (list of references/footnotes).
+    """
     global references
     # separate footnotes with separator. use _ instead of dashes
     # as -- is read as the beginning of a signature by e-mail clients
@@ -91,13 +93,15 @@ signature = 0
 
 # validate file exists
 if os.path.isfile(filename) is True:
-    # program can only convert text files
-    # TODO: add support for .htm/.html and .md files
-    if extension == ".txt":
+    # check for valid file types
+    if extension == ".txt" or ".html" or ".htm" or ".md":
         with open(filename, 'r', encoding='utf-8') as f:
             with open(filename_out, 'w', encoding='utf-8') as fout:
                 # iterate over all lines
                 for line in f:
+
+                    # start differentiating file types around here
+
                     # if the current line does not mark an e-mail signature
                     if line != "--\n":
                         # search and substitute lines using regex
