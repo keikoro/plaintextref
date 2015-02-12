@@ -19,6 +19,9 @@
 # to footnotes. Round brackets containing other text (including nested
 # brackets, round or square) are ignored.
 
+# TODO:
+# check html files
+
 import sys
 import os
 import re
