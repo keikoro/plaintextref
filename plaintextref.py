@@ -29,6 +29,8 @@ from urllib.parse import urlparse
 from collections import OrderedDict
 
 def inspectbrackets(matchobj):
+    """Further break down the regex matches for brackets and quotes.
+    """
     global counter
     global references
     fullref = matchobj.group(0)
