@@ -102,7 +102,9 @@ if os.path.isfile(filename) is True:
                 # iterate over all lines
                 for line in f:
 
-                    # start differentiating file types around here
+                    if extension == ".htm" or ".html":
+                        # filter out html entities
+                        pass
 
                     # if the current line does not mark an e-mail signature
                     if line != "--\n":
