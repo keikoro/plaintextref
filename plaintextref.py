@@ -20,9 +20,6 @@
 # to footnotes. Round brackets containing other text (including nested
 # brackets, round or square) are ignored.
 
-# TODO:
-# check html files
-
 import sys
 import os
 import re
@@ -30,7 +27,6 @@ from urllib.parse import urlparse
 from collections import OrderedDict
 from html.parser import HTMLParser
 import html.entities
-
 
 class HTMLClean(HTMLParser):
     """ class to clean HTML tags
