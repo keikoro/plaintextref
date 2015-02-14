@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 # Convert in-text references (URLs) to sequentially numbered footnotes.
 #
@@ -31,32 +32,56 @@ from html.parser import HTMLParser
 import html.entities
 
 
-# Solution to strip HTML tags and encode entities
-# by Søren Løvborg http://stackoverflow.com/a/7778368/1923870
-# adapted for Python3
-class HTMLTextExtractor(HTMLParser):
+class HTMLClean(HTMLParser):
+    """ class to clean HTML tags
+        and entities, including script tags
+    """
     def __init__(self):
         HTMLParser.__init__(self)
-        self.result = [ ]
+        self.result = []
 
-    def handle_data(self, d):
-        self.result.append(d)
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+        # print("Encountered a start tag:", tag)
+            for attr in attrs:
+                if attr[0] == "href":
+                    the_url = attr[1].strip()
+                    if the_url:
+                        self.result.append(the_url)
 
-    def handle_charref(self, number):
-        codepoint = int(number[1:], 16) if number[0] in (u'x', u'X') else int(number)
-        self.result.append(unichr(codepoint))
+    def handle_data(self, data):
+        # strip whitespace produced by html indentation
+        data = re.sub('( +\n +)', ' ', data)
+        data = re.sub('(\n +)', '\n', data)
+        self.result.append(data)
 
-    def handle_entityref(self, name):
-        codepoint = html.entities.name2codepoint[name]
-        self.result.append(chr(codepoint))
-
-    def get_text(self):
-        return u''.join(self.result)
+    def handle_endtag(self, tag):
+        # if preceding data was a hyperlink,
+        # switch its url + description
+        if tag == "a" and len(self.result) >= 2:
+            a_text = self.result.pop(-1)
+            a_href = self.result.pop(-1)
+            self.result.append(a_text)
+            self.result.append(" (" + a_href + ")")
+        # if preceding data was inside script and style tags
+        # remove it
+        if (tag == "script" or tag
+                == "style") and len(self.result) >= 1:
+            script = self.result.pop(-1)
+    def concatenate(self):
+        # concatenate individual pieces of data
+        fulltext = u''.join(self.result)
+        # trim whitespace at end of file
+        # and remove any remaining weird newline formatting
+        fulltext = fulltext.rstrip()
+        fulltext = re.sub('(\w)( *)(\n)(\w)', r'\1 \4', fulltext)
+        fulltext = re.sub('( *\n\n+ *)', '\n\n', fulltext)
+        return fulltext
 
 def html_to_text(html):
-    s = HTMLTextExtractor()
-    s.feed(html)
-    return s.get_text()
+    content = HTMLClean()
+    content.feed(html)
+    return content.concatenate()
 
 def inspectbrackets(matchobj):
     """Further break down the regex matches for brackets and quotes.
@@ -126,18 +151,22 @@ signature = 0
 # validate file exists
 if os.path.isfile(filename) is True:
     # check for valid file types
-    if extension == ".txt" or ".html" or ".htm" or ".md":
-        with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
+    if (extension == ".txt" or extension == ".html"
+        or extension == ".htm" or extension == ".md"):
+        with open(filename, 'r', encoding='utf-8') as f:
             with open(filename_out, 'w', encoding='utf-8') as fout:
+                # HTML needs conversion of tags
+                if extension == ".htm" or extension == ".html":
+                    # read in html file as one string
+                    # and split at <body> tag (only content is needed)
+                    html_to_str = f.read()
+                    html_split = html_to_str.split("<body>")
+                    if len(html_split) > 1:
+                        fout.write(html_to_text(html_split[1]))
+                    if len(html_split) > 0:
+                        fout.write(html_to_text(html_split[0]))
                 # iterate over all lines
                 for line in f:
-
-                    if extension == ".htm" or ".html":
-                        # filter out html entities
-                        # only use content in <body> tag
-                        print(html_to_text(line), end='')
-                        pass
-
                     # if the current line does not mark an e-mail signature
                     if line != "--\n":
                         # search and substitute lines using regex
