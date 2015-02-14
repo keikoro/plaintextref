@@ -27,6 +27,7 @@ import os
 import re
 from urllib.parse import urlparse
 from collections import OrderedDict
+from html.parser import HTMLParser
 
 def inspectbrackets(matchobj):
     """Further break down the regex matches for brackets and quotes.
