@@ -28,6 +28,35 @@ import re
 from urllib.parse import urlparse
 from collections import OrderedDict
 from html.parser import HTMLParser
+import html.entities
+
+
+# Solution to strip HTML tags and encode entities
+# by Søren Løvborg http://stackoverflow.com/a/7778368/1923870
+# adapted for Python3
+class HTMLTextExtractor(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.result = [ ]
+
+    def handle_data(self, d):
+        self.result.append(d)
+
+    def handle_charref(self, number):
+        codepoint = int(number[1:], 16) if number[0] in (u'x', u'X') else int(number)
+        self.result.append(unichr(codepoint))
+
+    def handle_entityref(self, name):
+        codepoint = html.entities.name2codepoint[name]
+        self.result.append(chr(codepoint))
+
+    def get_text(self):
+        return u''.join(self.result)
+
+def html_to_text(html):
+    s = HTMLTextExtractor()
+    s.feed(html)
+    return s.get_text()
 
 def inspectbrackets(matchobj):
     """Further break down the regex matches for brackets and quotes.
@@ -98,13 +127,15 @@ signature = 0
 if os.path.isfile(filename) is True:
     # check for valid file types
     if extension == ".txt" or ".html" or ".htm" or ".md":
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
             with open(filename_out, 'w', encoding='utf-8') as fout:
                 # iterate over all lines
                 for line in f:
 
                     if extension == ".htm" or ".html":
                         # filter out html entities
+                        # only use content in <body> tag
+                        print(html_to_text(line), end='')
                         pass
 
                     # if the current line does not mark an e-mail signature
