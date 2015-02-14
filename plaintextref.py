@@ -154,13 +154,13 @@ if os.path.isfile(filename) is True:
                 # HTML needs conversion of tags
                 if extension == ".htm" or extension == ".html":
                     # read in html file as one string
-                    # and split at <body> tag (only content is needed)
+                    # and split at <body> tag if present
                     html_to_str = f.read()
-                    html_split = html_to_str.split("<body>")
-                    if len(html_split) > 1:
-                        fout.write(html_to_text(html_split[1]))
-                    if len(html_split) > 0:
-                        fout.write(html_to_text(html_split[0]))
+                    body_split = html_to_str.split("<body>")
+                    if len(body_split) > 1:
+                        fout.write(html_to_text(body_split[1]))
+                    else:
+                        fout.write(html_to_text(body_split[0]))
                 # iterate over all lines
                 for line in f:
                     # if the current line does not mark an e-mail signature
