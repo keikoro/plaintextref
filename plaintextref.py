@@ -67,8 +67,9 @@ class HTMLClean(HTMLParser):
     def concatenate(self):
         # concatenate individual pieces of data
         fulltext = u''.join(self.result)
-        # trim whitespace at end of file
+        # trim whitespace at beginning and end of file
         # and remove any remaining weird newline formatting
+        fulltext = fulltext.lstrip()
         fulltext = fulltext.rstrip()
         fulltext = re.sub('(\w)( *)(\n)(\w)', r'\1 \4', fulltext)
         fulltext = re.sub('( *\n\n+ *)', '\n\n', fulltext)
@@ -136,6 +137,8 @@ filename_base, extension = os.path.splitext(filename)
 extension = extension.lower()
 # create new file for plaintext output
 filename_out = filename_base + "_plaintext" + extension
+filename_out2 = filename_base + "_plaintext2" + extension
+
 
 # create an ordered dictionary to store all references
 # initialise counter for references
@@ -148,21 +151,27 @@ signature = 0
 if os.path.isfile(filename) is True:
     # check for valid file types
     if (extension == ".txt" or extension == ".html"
-        or extension == ".htm" or extension == ".md"):
+            or extension == ".htm" or extension == ".md"):
         with open(filename, 'r', encoding='utf-8') as f:
-            with open(filename_out, 'w', encoding='utf-8') as fout:
-                # HTML needs conversion of tags
-                if extension == ".htm" or extension == ".html":
-                    # read in html file as one string
-                    # and split at <body> tag if present
-                    html_to_str = f.read()
-                    body_split = html_to_str.split("<body>")
-                    if len(body_split) > 1:
-                        fout.write(html_to_text(body_split[1]))
-                    else:
-                        fout.write(html_to_text(body_split[0]))
+            if extension == ".htm" or extension == ".html":
+                # read in html file as one string
+                # and split at <body> tag if present
+                html_to_str = f.read()
+                body_split = html_to_str.split("<body>")
+                if len(body_split) > 1:
+                    html_stripped = html_to_text(body_split[1])
+                else:
+                    html_stripped = html_to_text(body_split[0])
+                # create iterable list of lines
+                html_stripped = html_stripped.splitlines(True)
+
+            with open(filename_out, 'w+', encoding='utf-8') as fout:
+                if extension == ".html" or extension == ".htm":
+                    source = html_stripped
+                else:
+                    source = f
                 # iterate over all lines
-                for line in f:
+                for line in source:
                     # if the current line does not mark an e-mail signature
                     if line != "--\n":
                         # search and substitute lines using regex
