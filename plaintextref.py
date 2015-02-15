@@ -245,9 +245,11 @@ if __name__ == "__main__":
 
                     with open(filename_out, 'w+', encoding='utf-8') as fout:
                         fout.write(html_stripped)
+
                     # exit program after cleaning up html
                     # before filtering out references
-                    # sys.exit()
+                    if (args.noref):
+                        sys.exit()
 
                 with open(filename_out, 'w+', encoding='utf-8') as fout:
                     # status message
