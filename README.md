@@ -3,6 +3,8 @@
 A Python3 program which converts in-text references (citations, URLs) in 
 .txt and .html/.htm files to sequentially numbered footnotes for better readability.
 
+HTML files get stripped of their tags and changed to proper plaintext in the process.
+
 
 ## Example
 
