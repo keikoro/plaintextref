@@ -28,7 +28,7 @@
 
 #
 # TODO:
-# - account for multiple occurences of links? (list only once in appendix)
+# - account for multiple occurrences of links? (list only once in appendix)
 #   > switch references and counter in dictionary
 # - ignore or warn on square brackets containing only digits
 #   as these might already be footnotes
@@ -148,9 +148,16 @@ def inspectbrackets(matchobj):
         # netlocat (Network location part)
         url = urlparse(brkts_rd_content)
         if url.scheme is not '' and url.netloc is not '':
-            counter += 1
-            references[brkts_rd_content] = counter
-            ref = "[" + str(counter) + "]"
+            if brkts_rd_content in references:
+                refno = references[brkts_rd_content]
+                # status message
+                print("::: Note: Multiple occurrence of reference\n"
+                        "    {}".format(brkts_rd_content))
+            else:
+                counter += 1
+                refno = counter
+                references[brkts_rd_content] = refno
+            ref = "[" + str(refno) + "]"
             return ref
         # return original bracket content if it's not a URL
         else:
@@ -160,9 +167,17 @@ def inspectbrackets(matchobj):
         return fullref
     elif brkts_sq_content is not None:
         if brkts_sq_content != 'sic' and brkts_sq_content != 'sic!':
-            counter += 1
-            ref = "[" + str(counter) + "]"
-            references[brkts_sq_content] = counter
+
+            if brkts_sq_content in references:
+                refno = references[brkts_sq_content]
+                # status message
+                print("::: Note: Multiple occurrence of reference\n"
+                        "    \"{}\"".format(brkts_sq_content))
+            else:
+                counter += 1
+                refno = counter
+                references[brkts_sq_content] = refno
+            ref = "[" + str(refno) + "]"
             return ref
         else:
             return fullref
