@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Convert in-text references (URLs) to sequentially numbered footnotes.
-#
+# Convert in-text references (URLs) to sequentially numbered footnotes and
+# change text-based files (like HTML) to proper plaintext in the process.
+# 
 # Copyright (c) 2015 K Kollmann <code∆k.kollmann·moe>
 # License: http://opensource.org/licenses/MIT The MIT License (MIT)
 #
