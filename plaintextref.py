@@ -216,12 +216,15 @@ parser.add_argument("filename",
     help='''name of the file you want to convert;
 supported file types are: .txt, .html/.htm, .md''')
 parser.add_argument('-b','--begin', dest="begin", metavar="\"text\"",
-    help = '''define where to begin scanning an html file e.g.
---begin \"<body>\"
---b \"2 February 2015\"''')
-parser.add_argument('-i','--inclusive', dest="inclusive", action="store_true",
-    help = '''use to include the string provided in -b, --begin when parsing the file;
-by default, parsing begins only _after_ the given text''')
+    help = '''define where to begin scanning an HTML file
+e.g. --begin \"<body>\",
+e.g. --b \"2 February 2015\"''')
+parser.add_argument('-w','--with', dest="with", action="store_true",
+    help = '''run argument -b starting _with_ the text provided;
+by default, parsing begins only after the given string''')
+parser.add_argument('-i','--images', dest="images", action="store_true",
+    help = '''include image files in link descriptions of HTML files;
+default is to strip URLs of image files''')
 parser.add_argument('-a','--append', dest="suffix", metavar="\"_suffix\"",
     default="_plaintext",
     help = '''the suffix to append to the filename of the new file;
@@ -230,7 +233,7 @@ parser.add_argument('-s','--save', dest="suffix", metavar="\"filename\"",
     default="plaintext",
     help = '''the name to save the new file under if you do not want to use
 the original filename with a suffix added (see -a);
-the file extension gets added automatically, so do not include one in the name
+the file extension gets added automatically
 ''')
 parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
     help = '''to indicate there are already footnotes and an appendix present;
@@ -238,7 +241,7 @@ use to renumber existing references and incorporate them
 into a new appendix including both old and new references''')
 parser.add_argument('-n','--noref', dest="noref", action="store_true",
     help = '''convert the file to plaintext, but don't create an appendix;
-useful if you just want to strip html tags''')
+useful if you just want to strip HTML tags''')
 args = parser.parse_args()
 
 # split provided filename into name / extension
