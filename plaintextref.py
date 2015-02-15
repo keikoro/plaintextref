@@ -43,7 +43,6 @@ class HTMLClean(HTMLParser):
         HTMLParser.__init__(self)
         self.result = []
         self.urls = []
-        self.elements = 0
 
     def handle_starttag(self, tag, attrs):
         if tag == "a":
