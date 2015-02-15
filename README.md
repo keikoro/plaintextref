@@ -12,7 +12,7 @@ Original text:
 <br />
 Resulting text:
 
-<pre>Fans keep arguing over if Thranduil[1] or Thorin[2] makes the better[3] king.<br>
+<pre>Fans keep arguing over if Thranduil[1] or Thorin[2] makes the better[3] king.
 ___
 [1] <a href="http://evankart.deviantart.com/art/Thranduil-419996946">http://evankart.deviantart.com/art/Thranduil-419996946</a>
 [2] <a href="http://evankart.deviantart.com/art/Thorin-Oakenshield-420365763">http://evankart.deviantart.com/art/Thorin-Oakenshield-420365763</a>
