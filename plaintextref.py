@@ -30,7 +30,6 @@
 import sys
 import os
 import re
-import getopt
 import argparse
 from urllib.parse import urlparse
 from collections import OrderedDict
@@ -174,45 +173,6 @@ def writeappendix():
     for no, ref in references.items():
         fout.write("[{}] {}\n" .format(no, ref))
 
-def usage():
-    print("----------------------------------")
-    print("Usage information for PLAINTEXTREF")
-    print("----------------------------------")
-
-    print("Load the filename you want to convert like so:")
-    print("$ python3 plaintextref.py filename.txt\n")
-    print("Allowed file types:")
-    print(".txt, .html, .htm, .md\n")
-    print("Allowed options:")
-    print("-h | --help\thelp on how to use this program (= this screen)")
-    print("-s | --start\tdefine where to start scanning an html file\n"
-            "\t\te.g. --start \"<body>\"\n"
-            "\t\te.g. -s \"maincontainer\"")
-    print("-n | --noref\tconvert the file to plaintext, "
-            "but don't create an appendix;\n"
-            "\t\tuseful if you just want to strip html tags and entities)")
-
-
-def getarguments(argv):
-    start = '?'
-    try:
-        opts, args = getopt.getopt(argv, "hns:d", ["help", "start="])
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-    for opt, arg in opts:
-            if opt in ("-h", "--help"):
-                usage()
-                sys.exit()
-            elif opt == '-d':
-                global _debug
-                _debug = 1
-            elif opt in ("-s", "--start"):
-                start = arg
-
-    source = ''.join(args)
-    return source, start
-
 # check file type of file input by user via CLI
 # + convert extension to lower case just in case
 filename = sys.argv[-1]
@@ -246,8 +206,6 @@ parser.add_argument('-n','--noref',
                     help = '''convert the file to plaintext, but don't create an appendix;
 useful if you just want to strip html tags and entities''')
 args = parser.parse_args()
-
-
 
 
 if __name__ == "__main__":
