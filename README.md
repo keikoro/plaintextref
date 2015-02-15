@@ -1,7 +1,7 @@
 # plaintextref
 
 A Python3 program which converts in-text references (citations, URLs) in 
-.txt files to sequentially numbered footnotes for better readability.
+.txt and .html/.htm files to sequentially numbered footnotes for better readability.
 
 
 ## Example
@@ -25,7 +25,7 @@ This program is particularly useful for making texts like e-mails containing a h
 
 At the same time, the user writing such texts is not required to change their writing habits too much: URLs are put into (regular, round) brackets like they usually might, asides which are better left in the running text can also be kept in round brackets, only citations that should explicitely be converted to footnotes need to be enclosed in square brackets (which are normally lesser-used punctuation marks).
 
-Another intended purpose of this program is the conversion of HTML-formatted e-mails or texts to plain text for better sharing via mailing lists which only support or prefer the sending of plain text e-mails. However, **conversion of HTML documents is currently *not yet* supported**, see **Caveats** below.
+Another purpose of this program is the conversion of HTML-formatted e-mails or texts to plain text for better sharing via mailing lists which only support or prefer the sending of plain text e-mails.
 
 
 ## Usage
@@ -48,7 +48,7 @@ signify references that are to be turned into footnotes.
 Other text surrounded by round brackets (including any kind of nested brackets) is left untouched. Also ignored are square brackets denoting errors (```[sic]``` or ```[sic!]```) and square brackets indicating modified quotes *if* they are inside double quotation marks (```"Could you tell the [other dwarves] I said goodbye?"```).
 <br>
 
-The script currently only supports the conversion of **text files**. Adding support for **HTML** and **Markdown files** will be the next steps.
+The script currently supports the conversion of **text** and **HTML** files. Adding support for *Markdown files** might happen at a later point.
 
 <br>
 <hr>
