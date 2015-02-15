@@ -259,6 +259,9 @@ if __name__ == "__main__":
                     # don't create any footnotes if --noref flag is set
                     # (only converts html to plaintext)
                     if args.noref:
+                        # status message
+                        print("DONE.\n")
+                        print("The output file is: {}" .format(fout.name))
                         sys.exit()
 
                 with open(filename_out, 'w+', encoding='utf-8') as fout:
