@@ -202,8 +202,8 @@ useful if you just want to strip html tags and entities''')
 args = parser.parse_args()
 
 # split provided filename into name / extension
-filename_in = args.filename
-filename_split = filename_in.split(".")
+filename = args.filename
+filename_split = filename.split(".")
 filename_base = filename_split[0]
 ext = filename_split[1].lower()
 # create new filename for plaintext output
@@ -218,13 +218,13 @@ signature = 0
 
 if __name__ == "__main__":
     # validate file exists
-    if os.path.isfile(filename_in) is True:
+    if os.path.isfile(filename) is True:
         # check for valid file types
         if (ext == "txt" or ext == "html"
                 or ext == "htm" or ext == "md"):
-            with open(filename_in, 'r', encoding='utf-8') as f:
+            with open(filename, 'r', encoding='utf-8') as f:
                 print("------------")
-                print("Reading file...")
+                print("Reading input file...")
                 # Markdown still unsupported
                 if ext == 'md':
                     print("Sorry, Markdown conversion is not yet supported. ):")
