@@ -22,7 +22,6 @@
 
 # TODO:
 # - account for multiple occurences of links? (list only once in appendix)
-# - HTML: links w/o text descriptions are problematic -> <a><img></a>
 
 import sys
 import os
@@ -206,7 +205,7 @@ if os.path.isfile(filename) is True:
                     fout.write(html_stripped)
                 # exit program after cleaning up html
                 # before filtering out references
-                exit()
+                # exit()
 
             with open(filename_out, 'w+', encoding='utf-8') as fout:
                 if extension == ".html" or extension == ".htm":
