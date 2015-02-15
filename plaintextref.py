@@ -30,6 +30,8 @@
 import sys
 import os
 import re
+import getopt
+import argparse
 from urllib.parse import urlparse
 from collections import OrderedDict
 from html.parser import HTMLParser
@@ -172,6 +174,45 @@ def writeappendix():
     for no, ref in references.items():
         fout.write("[{}] {}\n" .format(no, ref))
 
+def usage():
+    print("----------------------------------")
+    print("Usage information for PLAINTEXTREF")
+    print("----------------------------------")
+
+    print("Load the filename you want to convert like so:")
+    print("$ python3 plaintextref.py filename.txt\n")
+    print("Allowed file types:")
+    print(".txt, .html, .htm, .md\n")
+    print("Allowed options:")
+    print("-h | --help\thelp on how to use this program (= this screen)")
+    print("-s | --start\tdefine where to start scanning an html file\n"
+            "\t\te.g. --start \"<body>\"\n"
+            "\t\te.g. -s \"maincontainer\"")
+    print("-n | --noref\tconvert the file to plaintext, "
+            "but don't create an appendix;\n"
+            "\t\tuseful if you just want to strip html tags and entities)")
+
+
+def getarguments(argv):
+    start = '?'
+    try:
+        opts, args = getopt.getopt(argv, "hns:d", ["help", "start="])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+            if opt in ("-h", "--help"):
+                usage()
+                sys.exit()
+            elif opt == '-d':
+                global _debug
+                _debug = 1
+            elif opt in ("-s", "--start"):
+                start = arg
+
+    source = ''.join(args)
+    return source, start
+
 # check file type of file input by user via CLI
 # + convert extension to lower case just in case
 filename = sys.argv[-1]
@@ -182,78 +223,105 @@ filename_out = filename_base + "_plaintext" + extension
 filename_out2 = filename_base + "_plaintext2" + extension
 
 # create an ordered dictionary to store all references
-# initialise counter for references
+# counter for references
+# counter for e-mail signature
 references = OrderedDict()
 counter = 0
-# check existence of signature
 signature = 0
 
-# validate file exists
-if os.path.isfile(filename) is True:
-    # check for valid file types
-    if (extension == ".txt" or extension == ".html"
-            or extension == ".htm" or extension == ".md"):
-        with open(filename, 'r', encoding='utf-8') as f:
-            # Markdown still unsupported
-            if extension == '.md':
-                print("Sorry, Markdown conversion is not yet supported. ):")
-            if extension == ".htm" or extension == ".html":
-                # read in html file as one string
-                # and split at <body> tag if present
-                html_to_str = f.read()
-                body_split = html_to_str.split("<body>")
-                if len(body_split) > 1:
-                    html_stripped = html_to_text(body_split[1])
-                else:
-                    html_stripped = html_to_text(body_split[0])
-                # create iterable list of lines
-                html_stripped_list = html_stripped.splitlines(True)
+parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        description = '''A program to change text-based files (like HTML)
+to proper plaintext and to convert all references (like URLs or citations)
+to sequentially numbered footnotes, which are appended to the file.
+Supported file types are: .txt, .html/.htm, .md
+''')
+parser.add_argument("filename", help="name of the file you want to convert")
+parser.add_argument('-s','--start',
+                    help = '''define where to start scanning an html file e.g.
+--s \"maincontainer\"
+--start \"<body>\"
+''')
+parser.add_argument('-n','--noref',
+                    help = '''convert the file to plaintext, but don't create an appendix;
+useful if you just want to strip html tags and entities''')
+args = parser.parse_args()
+
+
+
+
+if __name__ == "__main__":
+    # source, start = getarguments(sys.argv[1:])
+    # print(source)
+    # print(start)
+
+    source = filename
+    # validate file exists
+    if os.path.isfile(source) is True:
+        # check for valid file types
+        if (extension == ".txt" or extension == ".html"
+                or extension == ".htm" or extension == ".md"):
+            with open(filename, 'r', encoding='utf-8') as f:
+                # Markdown still unsupported
+                if extension == '.md':
+                    print("Sorry, Markdown conversion is not yet supported. ):")
+                if extension == ".htm" or extension == ".html":
+                    # read in html file as one string
+                    # and split at <body> tag if present
+                    html_to_str = f.read()
+                    body_split = html_to_str.split("<body>")
+                    if len(body_split) > 1:
+                        html_stripped = html_to_text(body_split[1])
+                    else:
+                        html_stripped = html_to_text(body_split[0])
+                    # create iterable list of lines
+                    html_stripped_list = html_stripped.splitlines(True)
+
+                    with open(filename_out, 'w+', encoding='utf-8') as fout:
+                        fout.write(html_stripped)
+                    # exit program after cleaning up html
+                    # before filtering out references
+                    # exit()
 
                 with open(filename_out, 'w+', encoding='utf-8') as fout:
-                    fout.write(html_stripped)
-                # exit program after cleaning up html
-                # before filtering out references
-                # exit()
-
-            with open(filename_out, 'w+', encoding='utf-8') as fout:
-                if extension == ".html" or extension == ".htm":
-                    source = html_stripped_list
-                else:
-                    source = f
-                # iterate over all lines
-                for line in source:
-                    # if the current line does not mark an e-mail signature
-                    if line != "--\n":
-                        # search and substitute lines using regex
-                        # find all round and square brackets
-                        # find all square brackets within quotes
-                        line_out = re.sub(""
-                            "(?#check for round brackets)"
-                            "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
-                            "(?#check for square brackets inside regular quotation marks)"
-                            "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
-                            "(?#check for square brackets inside formatted quotation marks)"
-                            "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
-                            "(?#check for square brackets)"
-                            "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
-                                inspectbrackets, line)
-                        # write back all lines (changed or unchanged)
-                        fout.write(line_out)
-                    # include appendix before e-mail signature
-                    # if the current line marks such a signature (--)
+                    if extension == ".html" or extension == ".htm":
+                        source = html_stripped_list
                     else:
-                        signature = 1
-                        if len(references) > 0:
-                            writeappendix()
-                        fout.write("\n" +line)
-                # include appendix at end if no signature was found
-                if signature == 0 and len(references) > 0:
-                    fout.write("\n\n")
-                    writeappendix()
-    # other file type than .txt was used
+                        source = f
+                    # iterate over all lines
+                    for line in source:
+                        # if the current line does not mark an e-mail signature
+                        if line != "--\n":
+                            # search and substitute lines using regex
+                            # find all round and square brackets
+                            # find all square brackets within quotes
+                            line_out = re.sub(""
+                                "(?#check for round brackets)"
+                                "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
+                                "(?#check for square brackets inside regular quotation marks)"
+                                "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
+                                "(?#check for square brackets inside formatted quotation marks)"
+                                "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
+                                "(?#check for square brackets)"
+                                "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
+                                    inspectbrackets, line)
+                            # write back all lines (changed or unchanged)
+                            fout.write(line_out)
+                        # include appendix before e-mail signature
+                        # if the current line marks such a signature (--)
+                        else:
+                            signature = 1
+                            if len(references) > 0:
+                                writeappendix()
+                            fout.write("\n" +line)
+                    # include appendix at end if no signature was found
+                    if signature == 0 and len(references) > 0:
+                        fout.write("\n\n")
+                        writeappendix()
+        # other file type than .txt was used
+        else:
+            print("You did not specify a valid file name.\n"
+            "Only .txt, .htm/.html and .md files can be converted.")
+    # file does not exist
     else:
-        print("You did not specify a valid file name.\n"
-        "Only .txt, .htm/.html and .md files can be converted.")      
-# file does not exist
-else:
-    print("You did not specify a valid file name.")
+        print("You did not specify a valid file name.")
