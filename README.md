@@ -49,7 +49,7 @@ signify references that are to be turned into footnotes.
 Other text surrounded by round brackets (including any kind of nested brackets) is left untouched. Also ignored are square brackets denoting errors (```[sic]``` or ```[sic!]```) and square brackets indicating modified quotes *if* they are inside double quotation marks (```"Could you tell the [other dwarves] I said goodbye?"```).
 <br>
 
-The script currently supports the conversion of **text** and **HTML** files. Adding support for *Markdown files** might happen at a later point.
+The script currently supports the conversion of **text** and **HTML** files. Adding support for **Markdown files** might happen at a later point.
 
 <br>
 <hr>
