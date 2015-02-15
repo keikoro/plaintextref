@@ -173,14 +173,41 @@ def writeappendix():
     for no, ref in references.items():
         fout.write("[{}] {}\n" .format(no, ref))
 
-# check file type of file input by user via CLI
-# + convert extension to lower case just in case
-filename = sys.argv[-1]
-filename_base, extension = os.path.splitext(filename)
-extension = extension.lower()
-# create new file for plaintext output
-filename_out = filename_base + "_plaintext" + extension
-filename_out2 = filename_base + "_plaintext2" + extension
+
+parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        description = '''---------------
+%(prog)s is a program to change text-based files (like HTML)
+to proper plaintext and to convert any references (like URLs or citations)
+to sequentially numbered footnotes which are appended to the file.
+
+References used for footnotes are URLs enclosed in round brackets
+as well as all any other text enclosed in square brackets.
+Regular text in round brackets, if not preceded by a URL, is ignored.
+
+See https://github.com/kerstin/plaintextref for a more detailed description.
+---------------
+''')
+parser.add_argument("filename",
+    help='''name of the file you want to convert;
+supported file types are: .txt, .html/.htm, .md''')
+parser.add_argument('-s','--start', dest="startparse",
+    help = '''define where to start scanning an html file e.g.
+--s \"maincontainer\"
+--start \"<body>\"
+''')
+parser.add_argument('-n','--noref', dest="noref",
+    help = '''convert the file to plaintext, but don't create an appendix;
+useful if you just want to strip html tags and entities''')
+args = parser.parse_args()
+
+# split provided filename into name / extension
+filename_in = args.filename
+filename_split = filename_in.split(".")
+filename_base = filename_split[0]
+ext = filename_split[1].lower()
+# create new filename for plaintext output
+filename_out = filename_base + "_plaintext." + ext
 
 # create an ordered dictionary to store all references
 # counter for references
@@ -189,41 +216,20 @@ references = OrderedDict()
 counter = 0
 signature = 0
 
-parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawTextHelpFormatter,
-        description = '''A program to change text-based files (like HTML)
-to proper plaintext and to convert all references (like URLs or citations)
-to sequentially numbered footnotes which are appended to the file.
-''')
-parser.add_argument("filename", help='''name of the file you want to convert;
-supported file types are: .txt, .html/.htm, .md''')
-parser.add_argument('-s','--start',
-                    help = '''define where to start scanning an html file e.g.
---s \"maincontainer\"
---start \"<body>\"
-''')
-parser.add_argument('-n','--noref',
-                    help = '''convert the file to plaintext, but don't create an appendix;
-useful if you just want to strip html tags and entities''')
-args = parser.parse_args()
-
-
 if __name__ == "__main__":
-    # source, start = getarguments(sys.argv[1:])
-    # print(source)
-    # print(start)
-
-    source = filename
     # validate file exists
-    if os.path.isfile(source) is True:
+    if os.path.isfile(filename_in) is True:
         # check for valid file types
-        if (extension == ".txt" or extension == ".html"
-                or extension == ".htm" or extension == ".md"):
-            with open(filename, 'r', encoding='utf-8') as f:
+        if (ext == "txt" or ext == "html"
+                or ext == "htm" or ext == "md"):
+            with open(filename_in, 'r', encoding='utf-8') as f:
+                print("------------")
+                print("Reading file...")
                 # Markdown still unsupported
-                if extension == '.md':
+                if ext == 'md':
                     print("Sorry, Markdown conversion is not yet supported. ):")
-                if extension == ".htm" or extension == ".html":
+                if ext == 'htm' or ext == 'html':
+                    print("Converting HTML to plaintext...")
                     # read in html file as one string
                     # and split at <body> tag if present
                     html_to_str = f.read()
@@ -242,7 +248,8 @@ if __name__ == "__main__":
                     # exit()
 
                 with open(filename_out, 'w+', encoding='utf-8') as fout:
-                    if extension == ".html" or extension == ".htm":
+                    print("Creating footnotes...")
+                    if ext == 'html' or ext == 'htm':
                         source = html_stripped_list
                     else:
                         source = f
@@ -276,6 +283,8 @@ if __name__ == "__main__":
                     if signature == 0 and len(references) > 0:
                         fout.write("\n\n")
                         writeappendix()
+                    print("DONE.\n")
+                    print("The output file is: {}" .format(fout.name))
         # other file type than .txt was used
         else:
             print("You did not specify a valid file name.\n"
