@@ -149,7 +149,7 @@ def inspectbrackets(matchobj):
         url = urlparse(brkts_rd_content)
         if url.scheme is not '' and url.netloc is not '':
             counter += 1
-            references[counter] = brkts_rd_content
+            references[brkts_rd_content] = counter
             ref = "[" + str(counter) + "]"
             return ref
         # return original bracket content if it's not a URL
@@ -162,7 +162,7 @@ def inspectbrackets(matchobj):
         if brkts_sq_content != 'sic' and brkts_sq_content != 'sic!':
             counter += 1
             ref = "[" + str(counter) + "]"
-            references[counter] = brkts_sq_content
+            references[brkts_sq_content] = counter
             return ref
         else:
             return fullref
@@ -178,9 +178,8 @@ def writeappendix():
     # as -- is read as the beginning of a signature by e-mail clients
     fout.write("___\n")
     # write appendix/bibliography to output file
-    for no, ref in references.items():
+    for ref, no in references.items():
         fout.write("[{}] {}\n" .format(no, ref))
-
 
 parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
