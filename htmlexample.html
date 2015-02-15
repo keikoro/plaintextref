@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <script>
+  </script>
+  <head>
+    <meta http-equiv="content-type" content="text/html">
+      <title>The page title</title>
+      <link rel="stylesheet" type="text/css" href="somecss.css">
+      <style type="text/css">
+        body {
+          background-color: #FF9933;
+          color: #FFFFFF;
+          font-family: Arial, Verdana, "Courier New";
+          font-size: 20px;
+        }
+      </style>
+  </head>
+  <body>
+    <div class="a div">
+      Some regular text here.
+      <div class="another div">
+        <!-- works -->
+        <a href="http://startpage.com">A link to Startpage.</a>
+        <br />
+        <!-- INVALID ... links internally -->
+        <a href="/internal/file">This link to an internal file should
+          not show up.</a>
+        <br>
+        <!-- INVALID ... not a proper link -->
+        <a href="yeah, this is not really a link">Same goes for
+          completely made-up links.</a>
+        <p>
+          <!-- works -->
+          <a href="https://xkcd.com/650/">And some link text followed by
+            an image <img src="https://sslimgs.xkcd.com/comics/nowhere.png" alt="xkcd comic" title="I mean, seriously, NOWHERE? For starters, there are like a thousand species of dinosaur."> followed by more text!</a>
+        </p>
+        <!-- works -->
+        <a href="https://en.wikipedia.org/wiki/Umlaut">&Uuml;mlauts work too, as do
+          HTML entities, like &amp;.</a>
+        <br><br />
+        <!-- INVALID ... hyperlinks without text description are ignored -->
+        <a href="http://photoshop.com"><img src="doesnotexist.png"></a>
+        Aaaand some more regular text.
+      </div>
+        <!-- works -->
+        <p>
+          This text includes a <span>span</span> element.<br>
+         <strong>Stroooong</strong> text.
+        </p>
+    </div>
+
+  <!-- Start Google Analytics -->
+    <script>
+      "let's pretend here's some google stuff"
+    </script>
+  <!-- End Google Analytics -->
+  </body>
+</html>
