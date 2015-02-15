@@ -36,8 +36,8 @@ from html.parser import HTMLParser
 import html.entities
 
 class HTMLClean(HTMLParser):
-    """ Class to clean HTML tags
-        and entities, including script tags.
+    """Class to clean HTML tags
+    and entities, including script tags.
     """
     def __init__(self):
         HTMLParser.__init__(self)
@@ -45,8 +45,9 @@ class HTMLClean(HTMLParser):
         self.urls = []
 
     def handle_starttag(self, tag, attrs):
+        """Look for hyperlinks and filter out their href attribute.
+        """
         if tag == "a":
-        # print("Encountered a start tag:", tag)
             for attr in attrs:
                 if attr[0] == "href":
                     the_url = attr[1].strip()
@@ -55,19 +56,24 @@ class HTMLClean(HTMLParser):
                         self.result.append(the_url)
 
     def handle_data(self, data):
+        """Add content enclosed within various HTML tags.
+        """
         # strip whitespace produced by html indentation
         data = re.sub('( +\n +)', ' ', data)
         data = re.sub('(\n +)', '\n', data)
         self.result.append(data)
 
     def handle_entityref(self, name):
+        """Convert HTML entities to their Unicode representations.
+        """
         html_entities = html.entities.name2codepoint[name]
         self.result.append(chr(html_entities))
 
     def handle_endtag(self, tag):
-        # check for hyperlinks whose <a> tags surround a description
-        # -> switch url and description
-        # remove hyperlinks whose <a> tags surround other content
+        """Look for hyperlinks whose <a></a> tags include a description,
+        then switch URL and description (as saved in the results list).
+        Remove hyperlinks whose <a></a> tags surround other content.
+        """
         count_data = len(self.result)
         if tag == "a" and count_data >= 2:
             descriptions = []
@@ -101,9 +107,10 @@ class HTMLClean(HTMLParser):
                 == "style") and len(self.result) >= 1:
             script = self.result.pop(-1)
     def concatenate(self):
-        # concatenate individual pieces of data
-        # trim whitespace at beginning and end of file
-        # and remove any remaining weird newline formatting
+        """Concatenate all individual pieces of data,
+        trim whitespace at beginning and end of file, and
+        remove any remaining weird newline formatting.
+        """
         fulltext = u''.join(self.result)
         fulltext = fulltext.lstrip()
         fulltext = fulltext.rstrip()
