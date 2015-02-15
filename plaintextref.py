@@ -22,6 +22,10 @@
 
 # TODO:
 # - account for multiple occurences of links? (list only once in appendix)
+#   > switch references and counter in dictionary
+# - allow flags/options for running the script, e.g.
+#   + html: define at which tag or words to start scanning the file
+#   + html: conversion to text-only but w/o filtering out references yet
 
 import sys
 import os
@@ -62,46 +66,46 @@ class HTMLClean(HTMLParser):
         self.result.append(chr(html_entities))
 
     def handle_endtag(self, tag):
-        # check for hyperlinks whose <a> tags surrounded a description
+        # check for hyperlinks whose <a> tags surround a description
         # -> switch url and description
-        # remove hyperlinks whose <a> tags surrounded other content
-        # count_self = len(self.result)
-        countlen = len(self.result)
-        if tag == "a" and len(self.result) >= 2:
-            collect_desc = []
-            # copy of list with valid URLs
+        # remove hyperlinks whose <a> tags surround other content
+        count_data = len(self.result)
+        if tag == "a" and count_data >= 2:
+            descriptions = []
             urls_copy = self.urls.copy()
+            # remove hyperlink descriptions before closing </a> tags
+            # if they do not belong to proper hyperlinks
+            # + join hyperlink descriptions that belong together
             if len(urls_copy) >= 1:
                 last_url = urls_copy.pop(-1)
-                while True and countlen >= 2:
+                while True and count_data >= 2:
                     last_data = self.result.pop(-1)
-                    countlen -= 1
+                    count_data -= 1
                     if last_data == last_url:
                         break
                     else:
-                        collect_desc.append(last_data)
-                if len(collect_desc) == 0:
+                        descriptions.append(last_data)
+                if len(descriptions) == 0:
                     pass
                 else:
-                    if len(collect_desc) > 1:
-                        collect_desc.reverse()
-                        desc_string = ''.join(collect_desc)
+                    if len(descriptions) > 1:
+                        descriptions.reverse()
+                        descriptions_collected = ''.join(descriptions)
                     else:
-                        desc_string = collect_desc[0]
+                        descriptions_collected = descriptions[0]
                     url = urlparse(last_url)
                     if url[0] is not '' and url[1] is not '':
-                        self.result.append(desc_string)
+                        self.result.append(descriptions_collected)
                         self.result.append(" (" + last_url + ")")
-        # if preceding data was inside script and style tags
-        # remove it
+        # remove any data that was inside <script> or <style> tags
         if (tag == "script" or tag
                 == "style") and len(self.result) >= 1:
             script = self.result.pop(-1)
     def concatenate(self):
         # concatenate individual pieces of data
-        fulltext = u''.join(self.result)
         # trim whitespace at beginning and end of file
         # and remove any remaining weird newline formatting
+        fulltext = u''.join(self.result)
         fulltext = fulltext.lstrip()
         fulltext = fulltext.rstrip()
         fulltext = re.sub('(\w)( *)(\n)(\w)', r'\1 \4', fulltext)
@@ -148,7 +152,6 @@ def inspectbrackets(matchobj):
         else:
             return fullref
     # regex search did not find any brackets in this line
-    # use None to return the original line
     else:
         return fullref
 
@@ -159,7 +162,7 @@ def writeappendix():
     # separate footnotes with separator. use _ instead of dashes
     # as -- is read as the beginning of a signature by e-mail clients
     fout.write("___\n")
-    # write references/bibliography to output file
+    # write appendix/bibliography to output file
     for no, ref in references.items():
         fout.write("[{}] {}\n" .format(no, ref))
 
@@ -171,7 +174,6 @@ extension = extension.lower()
 # create new file for plaintext output
 filename_out = filename_base + "_plaintext" + extension
 filename_out2 = filename_base + "_plaintext2" + extension
-
 
 # create an ordered dictionary to store all references
 # initialise counter for references
