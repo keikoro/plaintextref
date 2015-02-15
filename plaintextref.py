@@ -182,7 +182,7 @@ to proper plaintext and to convert any references (like URLs or citations)
 to sequentially numbered footnotes which are appended to the file.
 
 References used for footnotes are URLs enclosed in round brackets
-as well as all any other text enclosed in square brackets.
+as well as any other text enclosed in square brackets.
 Regular text in round brackets, if not preceded by a URL, is ignored.
 
 See https://github.com/kerstin/plaintextref for a more detailed description.
@@ -210,8 +210,8 @@ ext = filename_split[1].lower()
 filename_out = filename_base + "_plaintext." + ext
 
 # create an ordered dictionary to store all references
-# counter for references
-# counter for e-mail signature
+# add counter for references
+# add counter for e-mail signature
 references = OrderedDict()
 counter = 0
 signature = 0
@@ -228,7 +228,9 @@ if __name__ == "__main__":
                 # Markdown still unsupported
                 if ext == 'md':
                     print("Sorry, Markdown conversion is not yet supported. ):")
+                    sys.exit()
                 if ext == 'htm' or ext == 'html':
+                    # status message
                     print("Converting HTML to plaintext...")
                     # read in html file as one string
                     # and split at <body> tag if present
@@ -245,9 +247,10 @@ if __name__ == "__main__":
                         fout.write(html_stripped)
                     # exit program after cleaning up html
                     # before filtering out references
-                    # exit()
+                    # sys.exit()
 
                 with open(filename_out, 'w+', encoding='utf-8') as fout:
+                    # status message
                     print("Creating footnotes...")
                     if ext == 'html' or ext == 'htm':
                         source = html_stripped_list
@@ -283,6 +286,7 @@ if __name__ == "__main__":
                     if signature == 0 and len(references) > 0:
                         fout.write("\n\n")
                         writeappendix()
+                    # status message
                     print("DONE.\n")
                     print("The output file is: {}" .format(fout.name))
         # other file type than .txt was used
