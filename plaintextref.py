@@ -15,11 +15,12 @@
 # results in:
 # myfile_plaintext.txt
 #
-# The script currently only supports conversion of .txt files.
+# The script currently supports conversion of .txt and .html/.htm files.
 # Round brackets containing URLs and all square brackets get converted
 # to footnotes. Round brackets containing other text (including nested
 # brackets, round or square) are ignored.
-
+#
+#
 # TODO:
 # - account for multiple occurences of links? (list only once in appendix)
 #   > switch references and counter in dictionary
