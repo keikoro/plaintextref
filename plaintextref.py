@@ -23,9 +23,6 @@
 # TODO:
 # - account for multiple occurences of links? (list only once in appendix)
 #   > switch references and counter in dictionary
-# - allow flags/options for running the script, e.g.
-#   + html: define at which tag or words to start scanning the file
-#   + html: conversion to text-only but w/o filtering out references yet
 
 import sys
 import os
