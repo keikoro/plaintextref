@@ -20,7 +20,7 @@
 # -n NOREF, --noref NOREF
 #               convert the file to plaintext, but don't create an appendix;
 #               useful if you just want to strip HTML tags and entities
-
+#
 # The script currently supports conversion of .txt and .html/.htm files.
 # Round brackets containing URLs and all square brackets get converted
 # to footnotes. Round brackets containing other text (including nested
@@ -104,7 +104,7 @@ class HTMLClean(HTMLParser):
                     else:
                         descriptions_collected = descriptions[0]
                     url = urlparse(last_url)
-                    if url[0] is not '' and url[1] is not '':
+                    if url.scheme is not '' and url.netloc is not '':
                         self.result.append(descriptions_collected)
                         self.result.append(" (" + last_url + ")")
         # remove any data that was inside <script> or <style> tags
@@ -113,7 +113,7 @@ class HTMLClean(HTMLParser):
             script = self.result.pop(-1)
     def concatenate(self):
         """Concatenate all individual pieces of data,
-        trim whitespace at beginning and end of file, and
+        trim whitespace at beginning and end of file and
         remove any remaining weird newline formatting.
         """
         fulltext = u''.join(self.result)
@@ -140,10 +140,11 @@ def inspectbrackets(matchobj):
     brkts_sq_content = matchobj.group('sq')
     # regex search found round brackets
     if brkts_rd_content is not None:
-        # make sure content of brackets consists only of URLs
-        # check for attribute scheme (URL scheme specifier) at index 0
+        # verify brackets start with URL;
+        # check for attributes: scheme (URL scheme specifier) and
+        # netlocat (Network location part)
         url = urlparse(brkts_rd_content)
-        if url[0] is not '' and url[1] is not '':
+        if url.scheme is not '' and url.netloc is not '':
             counter += 1
             references[counter] = brkts_rd_content
             ref = "[" + str(counter) + "]"
