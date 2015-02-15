@@ -193,10 +193,10 @@ parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
         description = '''A program to change text-based files (like HTML)
 to proper plaintext and to convert all references (like URLs or citations)
-to sequentially numbered footnotes, which are appended to the file.
-Supported file types are: .txt, .html/.htm, .md
+to sequentially numbered footnotes which are appended to the file.
 ''')
-parser.add_argument("filename", help="name of the file you want to convert")
+parser.add_argument("filename", help='''name of the file you want to convert;
+supported file types are: .txt, .html/.htm, .md''')
 parser.add_argument('-s','--start',
                     help = '''define where to start scanning an html file e.g.
 --s \"maincontainer\"
