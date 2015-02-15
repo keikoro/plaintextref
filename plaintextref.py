@@ -191,10 +191,10 @@ See https://github.com/kerstin/plaintextref for a more detailed description.
 parser.add_argument("filename",
     help='''name of the file you want to convert;
 supported file types are: .txt, .html/.htm, .md''')
-parser.add_argument('-s','--start', dest="startparse",
+parser.add_argument('-s','--start', dest="start",
     help = '''define where to start scanning an html file e.g.
---s \"maincontainer\"
 --start \"<body>\"
+--s \"2 February 2015\"
 ''')
 parser.add_argument('-n','--noref', dest="noref",
     help = '''convert the file to plaintext, but don't create an appendix;
@@ -233,29 +233,34 @@ if __name__ == "__main__":
                     # status message
                     print("Converting HTML to plaintext...")
                     # read in html file as one string
-                    # and split at <body> tag if present
-                    html_to_str = f.read()
-                    body_split = html_to_str.split("<body>")
-                    if len(body_split) > 1:
-                        html_stripped = html_to_text(body_split[1])
+                    # and split at user-provided tag or string if present
+                    html_string = f.read()
+                    if args.start:
+                        startparse = args.start
+                        html_split = html_string.split(startparse, maxsplit=1)
+                        if len(html_split) > 1:
+                            html_stripped = html_to_text(html_split[1])
+                        else:
+                            # status message
+                            print("::: Attn: the starting point provided by you "
+                                "was _not_ found.")
+                            html_stripped = html_to_text(html_split[0])
                     else:
-                        html_stripped = html_to_text(body_split[0])
+                        html_stripped = html_to_text(html_string)
                     # create iterable list of lines
-                    html_stripped_list = html_stripped.splitlines(True)
-
+                    html_stripped_lines = html_stripped.splitlines(True)
                     with open(filename_out, 'w+', encoding='utf-8') as fout:
                         fout.write(html_stripped)
-
                     # don't create any footnotes if --noref flag is set
                     # (only converts html to plaintext)
-                    if (args.noref):
+                    if args.noref:
                         sys.exit()
 
                 with open(filename_out, 'w+', encoding='utf-8') as fout:
                     # status message
                     print("Creating footnotes...")
                     if ext == 'html' or ext == 'htm':
-                        source = html_stripped_list
+                        source = html_stripped_lines
                     else:
                         source = f
                     # iterate over all lines
