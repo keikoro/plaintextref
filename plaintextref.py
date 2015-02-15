@@ -6,21 +6,26 @@
 # 
 # Copyright (c) 2015 K Kollmann <code∆k.kollmann·moe>
 # License: http://opensource.org/licenses/MIT The MIT License (MIT)
-#
+
 # You need to have Python 3.x installed to run this script.
-# Run by opening the file containing the text you wish to convert.
-# The output gets saved to a new file whose name has _plaintext
-# appended to the original filename.
-# e.g.
-# $ python3 plaintextref.py myfile.txt
-# results in:
-# myfile_plaintext.txt
+# usage: python3 plaintextref.py [-h] [-s START] [-n NOREF] filename
 #
+# filename      name of the file you want to convert;
+#               supported file types are: .txt, .html/.htm
+# -h, --help    show help message
+# -s START, --start START
+#               define where to start scanning an html file e.g.
+#               --start "<body>"
+#               --s "2 February 2015"
+# -n NOREF, --noref NOREF
+#               convert the file to plaintext, but don't create an appendix;
+#               useful if you just want to strip HTML tags and entities
+
 # The script currently supports conversion of .txt and .html/.htm files.
 # Round brackets containing URLs and all square brackets get converted
 # to footnotes. Round brackets containing other text (including nested
 # brackets, round or square) are ignored.
-#
+
 #
 # TODO:
 # - account for multiple occurences of links? (list only once in appendix)
