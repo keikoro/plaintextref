@@ -20,6 +20,10 @@
 # to footnotes. Round brackets containing other text (including nested
 # brackets, round or square) are ignored.
 
+# TODO:
+# - account for multiple occurences of links? (list only once in appendix)
+# - HTML: links w/o text descriptions are problematic -> <a><img></a>
+
 import sys
 import os
 import re
@@ -29,12 +33,14 @@ from html.parser import HTMLParser
 import html.entities
 
 class HTMLClean(HTMLParser):
-    """ class to clean HTML tags
-        and entities, including script tags
+    """ Class to clean HTML tags
+        and entities, including script tags.
     """
     def __init__(self):
         HTMLParser.__init__(self)
         self.result = []
+        self.urls = []
+        self.elements = 0
 
     def handle_starttag(self, tag, attrs):
         if tag == "a":
@@ -43,6 +49,7 @@ class HTMLClean(HTMLParser):
                 if attr[0] == "href":
                     the_url = attr[1].strip()
                     if the_url:
+                        self.urls.append(the_url)
                         self.result.append(the_url)
 
     def handle_data(self, data):
@@ -51,14 +58,41 @@ class HTMLClean(HTMLParser):
         data = re.sub('(\n +)', '\n', data)
         self.result.append(data)
 
+    def handle_entityref(self, name):
+        html_entities = html.entities.name2codepoint[name]
+        self.result.append(chr(html_entities))
+
     def handle_endtag(self, tag):
-        # if preceding data was a hyperlink,
-        # switch its url + description
+        # check for hyperlinks whose <a> tags surrounded a description
+        # -> switch url and description
+        # remove hyperlinks whose <a> tags surrounded other content
+        # count_self = len(self.result)
+        countlen = len(self.result)
         if tag == "a" and len(self.result) >= 2:
-            a_text = self.result.pop(-1)
-            a_href = self.result.pop(-1)
-            self.result.append(a_text)
-            self.result.append(" (" + a_href + ")")
+            collect_desc = []
+            # copy of list with valid URLs
+            urls_copy = self.urls.copy()
+            if len(urls_copy) >= 1:
+                last_url = urls_copy.pop(-1)
+                while True and countlen >= 2:
+                    last_data = self.result.pop(-1)
+                    countlen -= 1
+                    if last_data == last_url:
+                        break
+                    else:
+                        collect_desc.append(last_data)
+                if len(collect_desc) == 0:
+                    pass
+                else:
+                    if len(collect_desc) > 1:
+                        collect_desc.reverse()
+                        desc_string = ''.join(collect_desc)
+                    else:
+                        desc_string = collect_desc[0]
+                    url = urlparse(last_url)
+                    if url[0] is not '' and url[1] is not '':
+                        self.result.append(desc_string)
+                        self.result.append(" (" + last_url + ")")
         # if preceding data was inside script and style tags
         # remove it
         if (tag == "script" or tag
@@ -153,6 +187,9 @@ if os.path.isfile(filename) is True:
     if (extension == ".txt" or extension == ".html"
             or extension == ".htm" or extension == ".md"):
         with open(filename, 'r', encoding='utf-8') as f:
+            # Markdown still unsupported
+            if extension == '.md':
+                print("Sorry, Markdown conversion is not yet supported. ):")
             if extension == ".htm" or extension == ".html":
                 # read in html file as one string
                 # and split at <body> tag if present
@@ -163,11 +200,17 @@ if os.path.isfile(filename) is True:
                 else:
                     html_stripped = html_to_text(body_split[0])
                 # create iterable list of lines
-                html_stripped = html_stripped.splitlines(True)
+                html_stripped_list = html_stripped.splitlines(True)
+
+                with open(filename_out, 'w+', encoding='utf-8') as fout:
+                    fout.write(html_stripped)
+                # exit program after cleaning up html
+                # before filtering out references
+                exit()
 
             with open(filename_out, 'w+', encoding='utf-8') as fout:
                 if extension == ".html" or extension == ".htm":
-                    source = html_stripped
+                    source = html_stripped_list
                 else:
                     source = f
                 # iterate over all lines
@@ -206,4 +249,4 @@ if os.path.isfile(filename) is True:
         "Only .txt, .htm/.html and .md files can be converted.")      
 # file does not exist
 else:
-    print("You did not specify a valid file name.\n")
+    print("You did not specify a valid file name.")
