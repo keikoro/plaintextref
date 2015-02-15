@@ -8,15 +8,15 @@
 # License: http://opensource.org/licenses/MIT The MIT License (MIT)
 
 # You need to have Python 3.x installed to run this script.
-# usage: python3 plaintextref.py [-h] [-s START] [-n NOREF] filename
+# usage: python3 plaintextref.py [-h] [-b text] [-n] filename
 #
 # filename      name of the file you want to convert;
 #               supported file types are: .txt, .html/.htm
 # -h, --help    show help message
-# -s START, --start START
-#               define where to start scanning an html file e.g.
-#               --start "<body>"
-#               --s "2 February 2015"
+# -b text, --begin text
+#               define where to begin scanning an html file e.g.
+#               --begin "<body>"
+#               --b "2 February 2015"
 # -n NOREF, --noref NOREF
 #               convert the file to plaintext, but don't create an appendix;
 #               useful if you just want to strip HTML tags and entities
@@ -31,6 +31,11 @@
 # - ignore or warn on square brackets containing only digits
 #   as these might already be footnotes
 #   (possibly then check for appendix, integrate existing footnotes via cli option)
+# - option to include begin text in conversion
+# - option to re-index an existing appendix / to combine old and new refs
+# - option to add user-created suffix to new filename
+# - option to rename the output file
+# - rename all converted files with references to .txt (keep .html for unconverted)
 
 import sys
 import os
@@ -204,21 +209,36 @@ to sequentially numbered footnotes which are appended to the file.
 References used for footnotes are URLs enclosed in round brackets
 as well as any other text enclosed in square brackets.
 Regular text in round brackets, if not preceded by a URL, is ignored.
-
 See https://github.com/kerstin/plaintextref for a more detailed description.
 ---------------
 ''')
 parser.add_argument("filename",
     help='''name of the file you want to convert;
 supported file types are: .txt, .html/.htm, .md''')
-parser.add_argument('-s','--start', dest="start",
-    help = '''define where to start scanning an html file e.g.
---start \"<body>\"
---s \"2 February 2015\"
+parser.add_argument('-b','--begin', dest="begin", metavar="\"text\"",
+    help = '''define where to begin scanning an html file e.g.
+--begin \"<body>\"
+--b \"2 February 2015\"''')
+parser.add_argument('-i','--inclusive', dest="inclusive", action="store_true",
+    help = '''use to include the string provided in -b, --begin when parsing the file;
+by default, parsing begins only _after_ the given text''')
+parser.add_argument('-a','--append', dest="suffix", metavar="\"_suffix\"",
+    default="_plaintext",
+    help = '''the suffix to append to the filename of the new file;
+defaults to "_plaintext" getting added to the original filename''')
+parser.add_argument('-s','--save', dest="suffix", metavar="\"filename\"",
+    default="plaintext",
+    help = '''the name to save the new file under if you do not want to use
+the original filename with a suffix added (see -a);
+the file extension gets added automatically, so do not include one in the name
 ''')
-parser.add_argument('-n','--noref', dest="noref",
+parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
+    help = '''to indicate there are already footnotes and an appendix present;
+use to renumber existing references and incorporate them
+into a new appendix including both old and new references''')
+parser.add_argument('-n','--noref', dest="noref", action="store_true",
     help = '''convert the file to plaintext, but don't create an appendix;
-useful if you just want to strip html tags and entities''')
+useful if you just want to strip html tags''')
 args = parser.parse_args()
 
 # split provided filename into name / extension
@@ -255,9 +275,9 @@ if __name__ == "__main__":
                     # read in html file as one string
                     # and split at user-provided tag or string if present
                     html_string = f.read()
-                    if args.start:
-                        startparse = args.start
-                        html_split = html_string.split(startparse, maxsplit=1)
+                    if args.begin:
+                        beginparse = args.begin
+                        html_split = html_string.split(beginparse, maxsplit=1)
                         if len(html_split) > 1:
                             html_stripped = html_to_text(html_split[1])
                         else:
