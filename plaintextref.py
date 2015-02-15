@@ -30,6 +30,9 @@
 # TODO:
 # - account for multiple occurences of links? (list only once in appendix)
 #   > switch references and counter in dictionary
+# - ignore or warn on square brackets containing only digits
+#   as these might already be footnotes
+#   (possibly then check for appendix, integrate existing footnotes via cli option)
 
 import sys
 import os
