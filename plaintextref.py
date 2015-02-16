@@ -224,10 +224,10 @@ defaults to _plaintext getting added to the original filename''')
 # simply append a suffix to the original filename (see -a);
 # the file extension gets added automatically in any case
 # ''')
-# parser.add_argument('-p','--path', dest="path", 
-#     help = '''path to save the converted file to if you do not want
-# to save it in the same directory as the original file
-# ''')
+parser.add_argument('-p','--path', dest="path",
+    help = '''path to save the converted file to if you do not want
+to save it in the same directory as the original file
+''')
 # parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
 #     help = '''if there are already footnotes and an appendix present,
 # renumber existing references and incorporate them
@@ -238,12 +238,41 @@ useful if you just want to strip HTML tags''')
 args = parser.parse_args()
 
 # split provided filename into name / extension
-filename = args.filename
+fullpath = args.filename
+
+if args.path:
+    filepath, filename = os.path.split(fullpath)
+    if filepath != '':
+        filepath += '/'
+
+    # try:
+    #     fp = open("myfile")
+    # except IOError as e:
+    #     if e.errno == errno.EACCES:
+    #         return "some default data"
+    #     # Not a permission error.
+    #     raise
+    # else:
+    #     with fp:
+    #         return fp.read()
+
+    if os.access(filepath, os.W_OK) is True:
+        pass
+        # print("true")
+    else:
+        # print("false")
+        pass
+try:
+    filename
+except NameError:
+    filename = fullpath
+
 filename_split = filename.split(".")
 filename_base = filename_split[0]
 ext = filename_split[1].lower()
 # create new filename for plaintext output
 filename_out = filename_base + args.suffix + "." + ext
+
 
 # create an ordered dictionary to store all references
 # add counter for references
