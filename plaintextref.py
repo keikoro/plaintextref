@@ -8,24 +8,13 @@
 # License: http://opensource.org/licenses/MIT The MIT License (MIT)
 
 # You need to have Python 3.x installed to run this script.
-# usage: python3 plaintextref.py [-h] [-b text] [-n] filename
-#
-# filename      name of the file you want to convert;
-#               supported file types are: .txt, .html/.htm
-# -h, --help    show help message
-# -b text, --begin text
-#               define where to begin scanning an html file e.g.
-#               --begin "<body>"
-#               --b "2 February 2015"
-# -n NOREF, --noref NOREF
-#               convert the file to plaintext, but don't create an appendix;
-#               useful if you just want to strip HTML tags and entities
+# Use -h or --help for help on how to use the program.
 #
 # The script currently supports conversion of .txt and .html/.htm files.
-# Round brackets containing URLs and all square brackets get converted
-# to footnotes. Round brackets containing other text (including nested
-# brackets, round or square) are ignored.
-
+# Round brackets containing URLs and square brackets get converted
+# to footnotes. Round brackets containing other text (including any nested
+# brackets) and square brackets within quotes to denote changes to
+# original citations as well as [sic] and [sic!] are ignored.
 #
 # TODO:
 # - ignore or warn on square brackets containing only digits
@@ -33,7 +22,6 @@
 #   (possibly then check for appendix, integrate existing footnotes via cli option)
 # - option to include begin text in conversion
 # - option to re-index an existing appendix / to combine old and new refs
-# - option to add user-created suffix to new filename
 # - option to rename the output file
 # - rename all converted files with references to .txt (keep .html for unconverted)
 
@@ -209,11 +197,12 @@ to sequentially numbered footnotes which are appended to the file.
 References used for footnotes are URLs enclosed in round brackets
 as well as any other text enclosed in square brackets.
 Regular text in round brackets, if not preceded by a URL, is ignored.
+
 See https://github.com/kerstin/plaintextref for a more detailed description.
 ---------------
 ''')
 parser.add_argument("filename",
-    help='''name of the file you want to convert;
+    help='''name of (path to) the file you want to convert;
 supported file types are: .txt, .html/.htm, .md''')
 parser.add_argument('-b','--begin', dest="begin", metavar="TEXT",
     help = '''define where to begin scanning an HTML file
@@ -227,7 +216,7 @@ e.g. --b \"2 February 2015\"''')
 # default is to strip <img> tags from converted HTML files''')
 parser.add_argument('-a','--append', dest="suffix", metavar="SUFFIX",
     default="_plaintext",
-    help = '''the suffix to append to the filename of the new file;
+    help = '''the suffix to append to the filename of the output file;
 defaults to _plaintext getting added to the original filename''')
 # parser.add_argument('-s','--save', dest="suffix", metavar="FILENAME",
 #     default="plaintext",
@@ -255,7 +244,6 @@ filename_base = filename_split[0]
 ext = filename_split[1].lower()
 # create new filename for plaintext output
 filename_out = filename_base + args.suffix + "." + ext
-print(args.suffix)
 
 # create an ordered dictionary to store all references
 # add counter for references
