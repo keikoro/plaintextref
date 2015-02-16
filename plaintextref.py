@@ -225,10 +225,10 @@ e.g. --b \"2 February 2015\"''')
 # parser.add_argument('-i','--images', dest="images", action="store_true",
 #     help = '''treat image files in <a></a> tags as part of the link description;
 # default is to strip <img> tags from converted HTML files''')
-# parser.add_argument('-a','--append', dest="suffix", metavar="SUFFIX",
-#     default="_plaintext",
-#     help = '''the suffix to append to the filename of the new file;
-# defaults to _plaintext getting added to the original filename''')
+parser.add_argument('-a','--append', dest="suffix", metavar="SUFFIX",
+    default="_plaintext",
+    help = '''the suffix to append to the filename of the new file;
+defaults to _plaintext getting added to the original filename''')
 # parser.add_argument('-s','--save', dest="suffix", metavar="FILENAME",
 #     default="plaintext",
 #     help = '''the name to save the new file under if you do not want to
@@ -254,7 +254,8 @@ filename_split = filename.split(".")
 filename_base = filename_split[0]
 ext = filename_split[1].lower()
 # create new filename for plaintext output
-filename_out = filename_base + "_plaintext." + ext
+filename_out = filename_base + args.suffix + "." + ext
+print(args.suffix)
 
 # create an ordered dictionary to store all references
 # add counter for references
