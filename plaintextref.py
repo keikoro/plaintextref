@@ -29,6 +29,7 @@ import sys
 import os
 import re
 import argparse
+import errno
 from urllib.parse import urlparse
 from collections import OrderedDict
 from html.parser import HTMLParser
@@ -237,39 +238,48 @@ parser.add_argument('-n','--noref', dest="noref", action="store_true",
 useful if you just want to strip HTML tags''')
 args = parser.parse_args()
 
-# split provided filename into name / extension
+
 fullpath = args.filename
 
-if args.path:
-    filepath, filename = os.path.split(fullpath)
-    if filepath != '':
-        filepath += '/'
-
-    # try:
-    #     fp = open("myfile")
-    # except IOError as e:
-    #     if e.errno == errno.EACCES:
-    #         return "some default data"
-    #     # Not a permission error.
-    #     raise
-    # else:
-    #     with fp:
-    #         return fp.read()
-
-    if os.access(filepath, os.W_OK) is True:
-        pass
-        # print("true")
-    else:
-        # print("false")
-        pass
+# validate provided filename/path
 try:
-    filename
-except NameError:
-    filename = fullpath
+    f = open(fullpath, 'r')
+except OSError as e:
+    # filename is a directory or invalid filename
+    if e.errno == errno.EISDIR or e.errno == errno.ENOENT:
+        sys.exit("You did not specify a valid file name.")
+    # no permission to read the file
+    elif e.errno == errno.EACCES:
+        sys.exit("The specified file cannot be read from.")
+    else:
+        print(e)
+else:
+    f.close()
+    filepath, filename = os.path.split(fullpath)
 
+if args.path:
+    newpath = args.path
+    # path provided is invalid    
+    if os.path.isdir(newpath) == False:
+        newpath = os.getcwd() + '/'
+        print("The specified path is not a valid directory.\n"
+                "Defaulting to current working directory.")        
+    # path provided is not writeable
+    elif os.access(newpath, os.W_OK) == False:
+        newpath = os.getcwd() + '/'
+        print("The specified path is not writeable.\n"
+        "Defaulting to current working directory.")
+    else:
+        if newpath[-1:] is not "/":
+            newpath += '/'
+else:
+    newpath = filepath
+
+filepath, filename = os.path.split(fullpath)
 filename_split = filename.split(".")
 filename_base = filename_split[0]
-ext = filename_split[1].lower()
+# ext = filename_split[1].lower()
+ext = "txt"
 # create new filename for plaintext output
 filename_out = filename_base + args.suffix + "." + ext
 
