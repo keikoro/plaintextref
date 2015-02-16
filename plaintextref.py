@@ -219,30 +219,30 @@ parser.add_argument('-b','--begin', dest="begin", metavar="TEXT",
     help = '''define where to begin scanning an HTML file
 e.g. --begin \"<body>\",
 e.g. --b \"2 February 2015\"''')
-parser.add_argument('-w','--with', dest="with", action="store_true",
-    help = '''run argument -b starting _with_ the text provided;
-by default, parsing begins only after the given string''')
-parser.add_argument('-i','--images', dest="images", action="store_true",
-    help = '''treat image files in <a></a> tags as part of the link description;
-default is to strip <img> tags from converted HTML files''')
-parser.add_argument('-a','--append', dest="suffix", metavar="SUFFIX",
-    default="_plaintext",
-    help = '''the suffix to append to the filename of the new file;
-defaults to _plaintext getting added to the original filename''')
-parser.add_argument('-s','--save', dest="suffix", metavar="FILENAME",
-    default="plaintext",
-    help = '''the name to save the new file under if you do not want to
-simply append a suffix to the original filename (see -a);
-the file extension gets added automatically in any case
-''')
-parser.add_argument('-p','--path', dest="path", 
-    help = '''path to save the converted file to if you do not want
-to save it in the same directory as the original file
-''')
-parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
-    help = '''if there are already footnotes and an appendix present,
-renumber existing references and incorporate them
-into a new appendix including both old and new references''')
+# parser.add_argument('-w','--with', dest="with", action="store_true",
+#     help = '''run argument -b starting _with_ the text provided;
+# by default, parsing begins only after the given string''')
+# parser.add_argument('-i','--images', dest="images", action="store_true",
+#     help = '''treat image files in <a></a> tags as part of the link description;
+# default is to strip <img> tags from converted HTML files''')
+# parser.add_argument('-a','--append', dest="suffix", metavar="SUFFIX",
+#     default="_plaintext",
+#     help = '''the suffix to append to the filename of the new file;
+# defaults to _plaintext getting added to the original filename''')
+# parser.add_argument('-s','--save', dest="suffix", metavar="FILENAME",
+#     default="plaintext",
+#     help = '''the name to save the new file under if you do not want to
+# simply append a suffix to the original filename (see -a);
+# the file extension gets added automatically in any case
+# ''')
+# parser.add_argument('-p','--path', dest="path", 
+#     help = '''path to save the converted file to if you do not want
+# to save it in the same directory as the original file
+# ''')
+# parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
+#     help = '''if there are already footnotes and an appendix present,
+# renumber existing references and incorporate them
+# into a new appendix including both old and new references''')
 parser.add_argument('-n','--noref', dest="noref", action="store_true",
     help = '''convert the file to plaintext, but don't create an appendix;
 useful if you just want to strip HTML tags''')
