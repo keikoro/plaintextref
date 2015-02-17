@@ -33,11 +33,13 @@ Another purpose of this program is the conversion of HTML-formatted e-mails or t
 
 ## Usage
 
-Start the script by specifying which file you want to convert. The converted text is saved to a new file which has ```_plaintext``` appended to the original file name. Save location is the folder containing the original file.
+Start the script by specifying which file you want to convert. The converted text is saved to a new file which, by default, has ```_plaintext``` appended to the original file name. Save location is the folder containing the original file or any other writable directory you specify.
 
 ```$ python3 plaintextref.py myfile.txt```
 
 ... results in a new file called ```myfile_plaintext.txt```
+
+Run the program with option ```-h``` or ```--help``` for detailed information on which arguments you can pass to the script.
 
 
 ##Caveats
@@ -48,7 +50,10 @@ The program assumes that
 <br>
 signify references that are to be turned into footnotes.
 
-Other text surrounded by round brackets (including any kind of nested brackets) is left untouched. Also ignored are square brackets denoting errors (```[sic]``` or ```[sic!]```) and square brackets indicating modified quotes *if* they are inside double quotation marks (```"Could you tell the [other dwarves] I said goodbye?"```).
+It ignores
+* any other text surrounded by round brackets (including any kind of nested brackets)
+* square brackets denoting errors (```[sic]```, ```[sic!]```)
+* square brackets indicating modified quotes *if* they are inside double quotation marks (```"Could you tell the [other dwarves] I said goodbye?"```)
 <br>
 
 The script currently supports the conversion of **text** and **HTML** files. Adding support for **Markdown files** might happen at a later point.
