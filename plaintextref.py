@@ -209,9 +209,9 @@ parser.add_argument('-b','--begin', dest="begin", metavar="TEXT",
     help = '''define where to begin scanning an HTML file
 e.g. --begin \"<body>\",
 e.g. --b \"2 February 2015\"''')
-# parser.add_argument('-w','--with', dest="with", action="store_true",
-#     help = '''run argument -b starting _with_ the text provided;
-# by default, parsing begins only after the given string''')
+parser.add_argument('-c','--contain', dest="contain", action="store_true",
+    help = '''run argument -b containg the text provided;
+by default, parsing begins only after the given string''')
 # parser.add_argument('-i','--images', dest="images", action="store_true",
 #     help = '''treat image files in <a></a> tags as part of the link description;
 # default is to strip <img> tags from converted HTML files''')
@@ -360,7 +360,7 @@ if __name__ == "__main__":
 
     # only allow files up to 1MB in size
     if os.path.getsize(fullpath) <= 1000000:
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(fullpath, 'r', encoding='utf-8') as f:
             # Markdown still unsupported
             if extension == 'md':
                 sys.exit("Sorry, Markdown conversion is not yet supported. ):")
@@ -376,7 +376,11 @@ if __name__ == "__main__":
                     beginparse = args.begin
                     html_split = html_string.split(beginparse, maxsplit=1)
                     if len(html_split) > 1:
-                        html_stripped = html_to_text(html_split[1])
+                        if args.contain is True:
+                            parsestring = beginparse + html_split[1]
+                        else:
+                            parsestring = html_split[1]
+                        html_stripped = html_to_text(parsestring)
                     else:
                         # status message
                         print("::: Attn: the starting point provided by you "
