@@ -53,7 +53,7 @@ It ignores:
 * round brackets containing regular text (including any kind of nested brackets)
 * square brackets denoting errors: ```[sic]``` and ```[sic!]```
 * square brackets indicating modified quotes *if* they are inside double quotation marks, e.g. ```"Could you tell the [other dwarves] I said goodbye?"```
-<br>
+<br><br>
 
 The script currently supports the conversion of regular **text** files as well as **HTML** files. Adding support for **Markdown files** might happen at a later point.
 
