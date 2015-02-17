@@ -20,10 +20,7 @@
 # - ignore or warn on square brackets containing only digits
 #   as these might already be footnotes
 #   (possibly then check for appendix, integrate existing footnotes via cli option)
-# - option to include begin text in conversion
 # - option to re-index an existing appendix / to combine old and new refs
-# - option to rename the output file
-# - rename all converted files with references to .txt (keep .html for unconverted)
 
 import sys
 import os
@@ -219,12 +216,12 @@ parser.add_argument('-a','--append', dest="suffix", metavar="SUFFIX",
     default="_plaintext",
     help = '''the suffix to append to the filename of the output file;
 defaults to _plaintext getting added to the original filename''')
-# parser.add_argument('-s','--save', dest="suffix", metavar="FILENAME",
-#     default="plaintext",
-#     help = '''the name to save the new file under if you do not want to
-# simply append a suffix to the original filename (see -a);
-# the file extension gets added automatically in any case
-# ''')
+parser.add_argument('-s','--save', dest="suffix", metavar="FILENAME",
+    default="plaintext",
+    help = '''the name to save the new file under if you do not want to
+simply append a suffix to the original filename (see -a);
+the file extension gets added automatically in any case
+''')
 parser.add_argument('-p','--path', dest="path",
     help = '''path to save the converted file to if you do not want
 to save it in the same directory as the original file
@@ -353,6 +350,11 @@ if __name__ == "__main__":
         separator = "."
         extsplit = extension.split(separator)
         extension = extsplit[-1]
+
+    #check for new filename
+    if args.suffix is not "":
+        fileroot = ""
+        suffix = args.suffix
     filename_out = newpath + fileroot + suffix + separator + extension
     # print("output file: " +filename_out) #debug
 
