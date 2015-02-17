@@ -21,7 +21,6 @@
 #   as these might already be footnotes
 #   (possibly then check for appendix, integrate existing footnotes via cli option)
 # - option to re-index an existing appendix / to combine old and new refs
-# - clean up filename/path comparison mess
 
 import sys
 import os
