@@ -121,7 +121,7 @@ def html_to_text(html):
     content.feed(html)
     return content.concatenate()
 
-def inspectbrackets(matchobj):
+def inspect_brackets(matchobj):
     """Further break down the regex matches for brackets and quotes.
     """
     global counter
@@ -175,7 +175,7 @@ def inspectbrackets(matchobj):
     else:
         return fullref
 
-def writeappendix():
+def write_appendix():
     """Write an appendix (list of references/footnotes).
     """
     global references
@@ -185,6 +185,35 @@ def writeappendix():
     # write appendix/bibliography to output file
     for ref, no in references.items():
         fout.write("[{}] {}\n" .format(no, ref))
+
+def newfilepath(**allpaths):
+    """Check writability of the path provided for the output file.
+    """
+    for key in allpaths:
+        # append missing / to paths
+        try:
+            if allpaths[key] is not "" and allpaths[key][-1:] is not '/':
+                allpaths[key] += '/'
+        except:
+            allpaths[key] = ''
+        # replace leading ~ with HOME dir in paths input as string
+        if allpaths[key].find("~") != -1:
+            allpaths[key] = os.path.expanduser(allpaths[key])
+    try:
+        oldpath = allpaths['oldpath']
+        argpath = allpaths['argpath']
+        cwd = allpaths['cwd']
+    except:
+        sys.exit("Argument missing. Please check your program code.")
+
+    if argpath is not '':
+        newpath = argpath
+    else:
+        newpath = oldpath
+
+    print("\nNew path: " + newpath)
+    return newpath
+
 
 parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
@@ -203,7 +232,7 @@ See https://github.com/kerstin/plaintextref for a more detailed description.
 parser.add_argument("filename",
     help='''name of (path to) the file you want to convert;
 supported file types are: .txt, .html/.htm, .md''')
-parser.add_argument('-b','--begin', dest="begin", metavar="TEXT",
+parser.add_argument('-b','--begin', dest="begin", metavar="\nTEXT\n",
     help = '''define where to begin scanning an HTML file
 e.g. --begin \"<body>\",
 e.g. --b \"2 February 2015\"''')
@@ -246,8 +275,7 @@ signature = 0
 if __name__ == "__main__":
 
     fullpath = os.path.realpath(args.filename)
-    # validate provided filename/path
-
+    # validate provided filename
     try:
         f = open(fullpath, 'r')
     except OSError as e:
@@ -261,84 +289,90 @@ if __name__ == "__main__":
             print(e)
     else:
         filepath, filename = os.path.split(fullpath)
-        if filepath[-1:] is not "/":
-            filepath += '/'
+
     finally:
         f.close()
 
+    newpath = newfilepath(oldpath=filepath, cwd=os.getcwd(), argpath=args.path)
+    print(newpath)
+
+
+    # newpath = ""
+
     # ------------ start filename/path check mess
-    cwd = os.getcwd()
-    if cwd[-1:] is not "/":
-        cwd += '/'
+    # cwd = os.getcwd()
+    # if cwd[-1:] is not "/":
+    #     cwd += '/'
 
-    # print("cwd: " +cwd) #debug
 
-    # validate provided new path
-    if args.path:
-        newpath = args.path
-        if newpath != filepath:
-            # path provided is invalid
-            if os.path.isdir(newpath) == False:
-                # status message
-                print("The specified path is not a valid directory.\n"
-                        "Defaulting to directory containing the original file.")
-                if filepath == cwd:
-                    # status message
-                    print("(= The current working directory.)")
-                newpath = filepath
-            # path provided is not writeable
-            elif os.access(newpath, os.W_OK) == False:
-                # status message
-                print("The specified path is not a writeable directory.\n"
-                "Defaulting to directory containing the original file.")
-                if filepath == cwd:
-                    # status message
-                    print("(= The current working directory.)")
-                newpath = filepath
-            else:
-                pass
-            if newpath[-1:] is not "/":
-                newpath += '/'
-    else:
-        newpath = filepath
+    # # print("cwd: " +cwd) #debug
 
-    # print("------") #debug
-    # print("filepath: " +filepath) #debug
-    # print("newpath: " +newpath) #debug
-    # print("cwd: " +cwd) #debug
+    # # validate provided new path
+    # if args.path:
+    #     newpath = args.path
+    #     if newpath != filepath:
+    #         # path provided is invalid
+    #         if os.path.isdir(newpath) == False:
+    #             # status message
+    #             print("The specified path is not a valid directory.\n"
+    #                     "Defaulting to directory containing the original file.")
+    #             if filepath == cwd:
+    #                 # status message
+    #                 print("(= The current working directory.)")
+    #             newpath = filepath
+    #         # path provided is not writable
+    #         elif os.access(newpath, os.W_OK) == False:
+    #             # status message
+    #             print("The specified path is not a writable directory.\n"
+    #             "Defaulting to directory containing the original file.")
+    #             if filepath == cwd:
+    #                 # status message
+    #                 print("(= The current working directory.)")
+    #             newpath = filepath
+    #         else:
+    #             pass
+    #         if newpath[-1:] is not "/":
+    #             newpath += '/'
+    # else:
+    #     newpath = filepath
 
-    if newpath == cwd:
-        if os.access(cwd, os.W_OK) == False:
-            if newpath == filepath:
-                # exit/error message
-                sys.exit("The current working directory is not writeable either.\n"
-                            "Exiting.")
-            else:
-                # exit/error message
-                sys.exit("The current working directory is not writeable.\n"
-                            "Exiting.")
-    else:
-        if os.access(newpath, os.W_OK) == False:
-            # exit/error message
-            print("The directory containing the original file is not "
-                        "writeable.\nTrying the current working directory.")
-            newpath = cwd
-            if os.access(cwd, os.W_OK) == False:
-                    # exit/error message
-                    sys.exit("The current working directory is not writeable either.\n"
-                                "Exiting.")
-        else:
-            if newpath == filepath and newpath == cwd:
-                # print("all the same dir") #debug
-                pass
-            elif newpath != filepath and newpath == cwd:
-                # print("current wd, cwd = " + cwd) #debug
-                pass
-            else:
-                # print("everything fine") #debug
-                pass
-            pass
-    # ------------ end filename/path check mess
+    # # print("------") #debug
+    # # print("filepath: " +filepath) #debug
+    # # print("newpath: " +newpath) #debug
+    # # print("cwd: " +cwd) #debug
+
+    # if newpath == cwd:
+    #     if os.access(cwd, os.W_OK) == False:
+    #         if newpath == filepath:
+    #             # exit/error message
+    #             sys.exit("The current working directory is not writable either.\n"
+    #                         "Exiting.")
+    #         else:
+    #             # exit/error message
+    #             sys.exit("The current working directory is not writable.\n"
+    #                         "Exiting.")
+    # else:
+    #     if os.access(newpath, os.W_OK) == False:
+    #         # exit/error message
+    #         print("The directory containing the original file is not "
+    #                     "writable.\nTrying the current working directory.")
+    #         newpath = cwd
+    #         if os.access(cwd, os.W_OK) == False:
+    #                 # exit/error message
+    #                 sys.exit("The current working directory is not writable either.\n"
+    #                             "Exiting.")
+    #     else:
+    #         if newpath == filepath and newpath == cwd:
+    #             # print("all the same dir") #debug
+    #             pass
+    #         elif newpath != filepath and newpath == cwd:
+    #             # print("current wd, cwd = " + cwd) #debug
+    #             pass
+    #         else:
+    #             # print("everything fine") #debug
+    #             pass
+    #         pass
+    # # ------------ end filename/path check mess
 
     fileroot, extension = os.path.splitext(filename)
     # check for file root and extension
@@ -383,8 +417,8 @@ if __name__ == "__main__":
                         html_stripped = html_to_text(parsestring)
                     else:
                         # status message
-                        print("::: Attn: the starting point provided by you "
-                            "was _not_ found.")
+                        print("::: Attn: the starting point \"" + beginparse
+                            + "\" for parsing was not found.")
                         html_stripped = html_to_text(html_split[0])
                 else:
                     html_stripped = html_to_text(html_string)
@@ -423,7 +457,7 @@ if __name__ == "__main__":
                             "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
                             "(?#check for square brackets)"
                             "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
-                                inspectbrackets, line)
+                                inspect_brackets, line)
                         # write back all lines (changed or unchanged)
                         fout.write(line_out)
                     # include appendix before e-mail signature
@@ -431,12 +465,12 @@ if __name__ == "__main__":
                     else:
                         signature = 1
                         if len(references) > 0:
-                            writeappendix()
+                            write_appendix()
                         fout.write("\n" +line)
                 # include appendix at end if no signature was found
                 if signature == 0 and len(references) > 0:
                     fout.write("\n\n")
-                    writeappendix()
+                    write_appendix()
                 # status message
                 print("DONE.")
                 print("The output file is: {}" .format(fout.name))
