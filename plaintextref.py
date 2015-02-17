@@ -3,7 +3,7 @@
 
 # Convert in-text references (URLs) to sequentially numbered footnotes and
 # change text-based files (like HTML) to proper plaintext in the process.
-# 
+#
 # Copyright (c) 2015 K Kollmann <code∆k.kollmann·moe>
 # License: http://opensource.org/licenses/MIT The MIT License (MIT)
 
@@ -22,7 +22,6 @@
 #   (possibly then check for appendix, integrate existing footnotes via cli option)
 # - option to re-index an existing appendix / to combine old and new refs
 # - clean up filename/path comparison mess
-# - add own suffix on file rename
 
 import sys
 import os
@@ -153,7 +152,7 @@ def inspectbrackets(matchobj):
         # return original bracket content if it's not a URL
         else:
             return fullref
-    # regex search found square brackets    
+    # regex search found square brackets
     elif brkts_sq_inquote is not None or brkts_sq_inquote_2 is not None:
         return fullref
     elif brkts_sq_content is not None:
@@ -218,8 +217,7 @@ parser.add_argument('-a','--append', dest="suffix", metavar="SUFFIX",
     default="_plaintext",
     help = '''the suffix to append to the filename of the output file;
 defaults to _plaintext getting added to the original filename''')
-parser.add_argument('-s','--save', dest="suffix", metavar="FILENAME",
-    default="plaintext",
+parser.add_argument('-s','--save', dest="newname", metavar="FILENAME",
     help = '''the name to save the new file under if you do not want to
 simply append a suffix to the original filename (see -a);
 the file extension gets added automatically in any case
@@ -241,7 +239,7 @@ args = parser.parse_args()
 # add counter for references
 # add counter for e-mail signature
 references = OrderedDict()
-suffix = args.suffix
+suffix = "_plaintext"
 counter = 0
 signature = 0
 
@@ -353,14 +351,12 @@ if __name__ == "__main__":
         extsplit = extension.split(separator)
         extension = extsplit[-1]
 
-    #check for new filename
+    #check for new filename and suffix
     if args.suffix is not "":
-        fileroot = ""
         suffix = args.suffix
+    if args.newname is not None and args.newname is not "":
+        fileroot = args.newname
     filename_out = newpath + fileroot + suffix + separator + extension
-    # print("output file: " +filename_out) #debug
-
-    # check for valid file types
 
     # only allow files up to 1MB in size
     if os.path.getsize(fullpath) <= 1000000:
@@ -400,7 +396,7 @@ if __name__ == "__main__":
                 # (only converts html to plaintext)
                 if args.noref:
                     # status message
-                    print("DONE.\n")
+                    print("DONE.")
                     print("The output file is: {}" .format(fout.name))
                     sys.exit()
 
@@ -442,7 +438,7 @@ if __name__ == "__main__":
                     fout.write("\n\n")
                     writeappendix()
                 # status message
-                print("DONE.\n")
+                print("DONE.")
                 print("The output file is: {}" .format(fout.name))
     else:
         print("File size must be below 1MB.")
