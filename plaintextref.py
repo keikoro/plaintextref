@@ -274,7 +274,7 @@ if __name__ == "__main__":
     if cwd[-1:] is not "/":
         cwd += '/'
 
-    print("cwd: " +cwd)
+    # print("cwd: " +cwd) #debug
 
     # validate provided new path
     if args.path:
@@ -351,19 +351,19 @@ if __name__ == "__main__":
         extsplit = extension.split(separator)
         extension = extsplit[-1]
     filename_out = newpath + fileroot + suffix + separator + extension
-    print("output file: " +filename_out)
+    # print("output file: " +filename_out) #debug
 
-        # check for valid file types
-    if (ext == "txt" or ext == "html"
-            or ext == "htm" or ext == "md"):
+    # check for valid file types
+
+    # only allow files up to 1MB in size
+    if os.path.getsize(fullpath) <= 1000000:
         with open(filename, 'r', encoding='utf-8') as f:
-            print("------------")
-            print("Reading input file...")
             # Markdown still unsupported
-            if ext == 'md':
-                print("Sorry, Markdown conversion is not yet supported. ):")
-                sys.exit()
-            if ext == 'htm' or ext == 'html':
+            if extension == 'md':
+                sys.exit("Sorry, Markdown conversion is not yet supported. ):")
+            else:
+                print("Reading input file...")
+            if extension == 'htm' or extension == 'html':
                 # status message
                 print("Converting HTML to plaintext...")
                 # read in html file as one string
@@ -396,7 +396,7 @@ if __name__ == "__main__":
             with open(filename_out, 'w+', encoding='utf-8') as fout:
                 # status message
                 print("Creating footnotes...")
-                if ext == 'html' or ext == 'htm':
+                if extension == 'html' or extension == 'htm':
                     source = html_stripped_lines
                 else:
                     source = f
@@ -433,7 +433,5 @@ if __name__ == "__main__":
                 # status message
                 print("DONE.\n")
                 print("The output file is: {}" .format(fout.name))
-    other file type than .txt was used
     else:
-        print("You did not specify a valid file name.\n"
-        "Only .txt, .htm/.html and .md files can be converted.")
+        print("File size must be below 1MB.")
