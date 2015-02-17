@@ -139,7 +139,7 @@ def inspect_brackets(matchobj):
         if url.scheme is not '' and url.netloc is not '':
             if brkts_rd_content in references:
                 refno = references[brkts_rd_content]
-                # status message
+                # status msg
                 print("::: Note: Multiple occurrence of reference\n"
                         "    {}".format(brkts_rd_content))
             else:
@@ -159,7 +159,7 @@ def inspect_brackets(matchobj):
 
             if brkts_sq_content in references:
                 refno = references[brkts_sq_content]
-                # status message
+                # status msg
                 print("::: Note: Multiple occurrence of reference\n"
                         "    \"{}\"".format(brkts_sq_content))
             else:
@@ -177,7 +177,6 @@ def inspect_brackets(matchobj):
 def write_appendix():
     """Write an appendix (list of references/footnotes).
     """
-    global references
     # separate footnotes with separator. use _ instead of dashes
     # as -- is read as the beginning of a signature by e-mail clients
     fout.write("___\n")
@@ -331,8 +330,8 @@ if __name__ == "__main__":
     fileroot, extension = os.path.splitext(filename)
     # check for file root and extension
     if extension is "":
-        # status message
-        print("::: Attn: the provided file has no file extension")
+        # status msg
+        print("::: Attn: the provided file has no file extension.")
         separator = ""
     else:
         separator = "."
@@ -355,7 +354,7 @@ if __name__ == "__main__":
             else:
                 print("Reading input file...")
             if extension == 'htm' or extension == 'html':
-                # status message
+                # status msg
                 print("Converting HTML to plaintext...")
                 # read in html file as one string
                 # and split at user-provided tag or string if present
@@ -370,7 +369,7 @@ if __name__ == "__main__":
                             parsestring = html_split[1]
                         html_stripped = html_to_text(parsestring)
                     else:
-                        # status message
+                        # status msg
                         print("::: Attn: the starting point \"" + beginparse
                             + "\" for parsing was not found.")
                         html_stripped = html_to_text(html_split[0])
@@ -383,14 +382,14 @@ if __name__ == "__main__":
                 # don't create any footnotes if --noref flag is set
                 # (only converts html to plaintext)
                 if args.noref:
-                    # status message
+                    # status msg
                     print("DONE.")
                     print("The output file is: {}" .format(fout.name))
                     sys.exit()
 
             with open(filename_out, 'w+', encoding='utf-8') as fout:
-                # status message
-                print("Creating footnotes...")
+                # status msg
+                print("Looking for references...")
                 if extension == 'html' or extension == 'htm':
                     source = html_stripped_lines
                 else:
@@ -420,12 +419,22 @@ if __name__ == "__main__":
                         signature = 1
                         if len(references) > 0:
                             write_appendix()
+                            # status msg
+                            print("Appendix created.")
+                        else:
+                            # status msg
+                            print("No references found.")
                         fout.write("\n" +line)
                 # include appendix at end if no signature was found
                 if signature == 0 and len(references) > 0:
                     fout.write("\n\n")
                     write_appendix()
-                # status message
+                    # status msg
+                    print("Appendix created.")
+                else:
+                    # status msg
+                    print("No references found.")
+                # status msg
                 print("DONE.")
                 print("The output file is: {}" .format(fout.name))
     else:
