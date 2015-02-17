@@ -211,7 +211,7 @@ def newfilepath(**allpaths):
     else:
         newpath = oldpath
 
-    # schema for pathname checks
+    # check pathnames for writability
     while newpath == "":
         if argpath == oldpath:
             newpath = oldpath
@@ -249,8 +249,6 @@ def newfilepath(**allpaths):
                     else:
                         sys.exit("The current working directory is not writable.\n"
                                     "Exiting.")
-
-    print("new path: " +newpath) #debug
     return newpath
 
 parser = argparse.ArgumentParser(
@@ -283,15 +281,15 @@ by default, parsing begins only after the given string''')
 parser.add_argument('-a','--append', dest="suffix", metavar="SUFFIX",
     default="_plaintext",
     help = '''the suffix to append to the filename of the output file;
-defaults to _plaintext getting added to the original filename''')
+defaults to _plaintext being added to the original filename''')
 parser.add_argument('-s','--save', dest="newname", metavar="FILENAME",
     help = '''the name to save the new file under if you do not want to
 simply append a suffix to the original filename (see -a);
-the file extension gets added automatically in any case
+the file extension of the original file gets added in any case
 ''')
 parser.add_argument('-p','--path', dest="path",
-    help = '''path to save the converted file to if you do not want
-to save it in the same directory as the original file
+    help = '''path to save the converted file to if you do not want to
+save it in the same directory as the original file
 ''')
 # parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
 #     help = '''if there are already footnotes and an appendix present,
@@ -330,7 +328,6 @@ if __name__ == "__main__":
         f.close()
 
     newpath = newfilepath(oldpath=filepath, cwd=os.getcwd(), argpath=args.path)
-    print("new path returned: " +newpath) #debug
 
     fileroot, extension = os.path.splitext(filename)
     # check for file root and extension
@@ -351,7 +348,7 @@ if __name__ == "__main__":
     filename_out = newpath + fileroot + suffix + separator + extension
 
     # only allow files up to 1MB in size
-    if os.path.getsize(fullpath) <= 1000000:
+    if os.path.getsize(fullpath) <= 2000000:
         with open(fullpath, 'r', encoding='utf-8') as f:
             # Markdown still unsupported
             if extension == 'md':
@@ -433,4 +430,4 @@ if __name__ == "__main__":
                 print("DONE.")
                 print("The output file is: {}" .format(fout.name))
     else:
-        print("File size must be below 1MB.")
+        print("File size must be below 2MB.")
