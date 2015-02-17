@@ -242,13 +242,15 @@ args = parser.parse_args()
 # add counter for references
 # add counter for e-mail signature
 references = OrderedDict()
+suffix = args.suffix
 counter = 0
 signature = 0
 
 if __name__ == "__main__":
 
-    fullpath = args.filename
+    fullpath = os.path.realpath(args.filename)
     # validate provided filename/path
+
     try:
         f = open(fullpath, 'r')
     except OSError as e:
@@ -263,114 +265,174 @@ if __name__ == "__main__":
     else:
         f.close()
         filepath, filename = os.path.split(fullpath)
+        if filepath[-1:] is not "/":
+            filepath += '/'
 
+    # ------------ start filename/path check mess
+    cwd = os.getcwd()
+    if cwd[-1:] is not "/":
+        cwd += '/'
+
+    print("cwd: " +cwd)
+
+    # validate provided new path
     if args.path:
         newpath = args.path
-        # path provided is invalid
-        if os.path.isdir(newpath) == False:
-            newpath = os.getcwd() + '/'
-            print("The specified path is not a valid directory.\n"
-                    "Defaulting to current working directory.")
-        # path provided is not writeable
-        elif os.access(newpath, os.W_OK) == False:
-            newpath = os.getcwd() + '/'
-            print("The specified path is not writeable.\n"
-            "Defaulting to current working directory.")
-        else:
+        if newpath != filepath:
+            # path provided is invalid
+            if os.path.isdir(newpath) == False:
+                # status message
+                print("The specified path is not a valid directory.\n"
+                        "Defaulting to directory containing the original file.")
+                if filepath == cwd:
+                    # status message
+                    print("(= The current working directory.)")
+                newpath = filepath
+            # path provided is not writeable
+            elif os.access(newpath, os.W_OK) == False:
+                # status message
+                print("The specified path is not a writeable directory.\n"
+                "Defaulting to directory containing the original file.")
+                if filepath == cwd:
+                    # status message
+                    print("(= The current working directory.)")
+                newpath = filepath
+            else:
+                pass
             if newpath[-1:] is not "/":
                 newpath += '/'
     else:
         newpath = filepath
 
-    filepath, filename = os.path.split(fullpath)
-    filename_split = filename.split(".")
-    filename_base = filename_split[0]
-    # ext = filename_split[1].lower()
-    ext = "txt"
-    # create new filename for plaintext output
-    filename_out = filename_base + args.suffix + "." + ext
+    # print("------") #debug
+    # print("filepath: " +filepath) #debug
+    # print("newpath: " +newpath) #debug
+    # print("cwd: " +cwd) #debug
 
-        # check for valid file types
-    if (ext == "txt" or ext == "html"
-            or ext == "htm" or ext == "md"):
-        with open(filename, 'r', encoding='utf-8') as f:
-            print("------------")
-            print("Reading input file...")
-            # Markdown still unsupported
-            if ext == 'md':
-                print("Sorry, Markdown conversion is not yet supported. ):")
-                sys.exit()
-            if ext == 'htm' or ext == 'html':
-                # status message
-                print("Converting HTML to plaintext...")
-                # read in html file as one string
-                # and split at user-provided tag or string if present
-                html_string = f.read()
-                if args.begin:
-                    beginparse = args.begin
-                    html_split = html_string.split(beginparse, maxsplit=1)
-                    if len(html_split) > 1:
-                        html_stripped = html_to_text(html_split[1])
-                    else:
-                        # status message
-                        print("::: Attn: the starting point provided by you "
-                            "was _not_ found.")
-                        html_stripped = html_to_text(html_split[0])
-                else:
-                    html_stripped = html_to_text(html_string)
-                # create iterable list of lines
-                html_stripped_lines = html_stripped.splitlines(True)
-                with open(filename_out, 'w+', encoding='utf-8') as fout:
-                    fout.write(html_stripped)
-                # don't create any footnotes if --noref flag is set
-                # (only converts html to plaintext)
-                if args.noref:
-                    # status message
-                    print("DONE.\n")
-                    print("The output file is: {}" .format(fout.name))
-                    sys.exit()
-
-            with open(filename_out, 'w+', encoding='utf-8') as fout:
-                # status message
-                print("Creating footnotes...")
-                if ext == 'html' or ext == 'htm':
-                    source = html_stripped_lines
-                else:
-                    source = f
-                # iterate over all lines
-                for line in source:
-                    # if the current line does not mark an e-mail signature
-                    if line != "--\n":
-                        # search and substitute lines using regex
-                        # find all round and square brackets
-                        # find all square brackets within quotes
-                        line_out = re.sub(""
-                            "(?#check for round brackets)"
-                            "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
-                            "(?#check for square brackets inside regular quotation marks)"
-                            "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
-                            "(?#check for square brackets inside formatted quotation marks)"
-                            "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
-                            "(?#check for square brackets)"
-                            "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
-                                inspectbrackets, line)
-                        # write back all lines (changed or unchanged)
-                        fout.write(line_out)
-                    # include appendix before e-mail signature
-                    # if the current line marks such a signature (--)
-                    else:
-                        signature = 1
-                        if len(references) > 0:
-                            writeappendix()
-                        fout.write("\n" +line)
-                # include appendix at end if no signature was found
-                if signature == 0 and len(references) > 0:
-                    fout.write("\n\n")
-                    writeappendix()
-                # status message
-                print("DONE.\n")
-                print("The output file is: {}" .format(fout.name))
-    # other file type than .txt was used
+    if newpath == cwd:
+        if os.access(cwd, os.W_OK) == False:
+            if newpath == filepath:
+                # exit/error message
+                sys.exit("The current working directory is not writeable either.\n"
+                            "Exiting.")
+            else:
+                # exit/error message
+                sys.exit("The current working directory is not writeable.\n"
+                            "Exiting.")
     else:
-        print("You did not specify a valid file name.\n"
-        "Only .txt, .htm/.html and .md files can be converted.")
+        if os.access(newpath, os.W_OK) == False:
+            # exit/error message
+            print("The directory containing the original file is not "
+                        "writeable.\nTrying the current working directory.")
+            newpath = cwd
+            if os.access(cwd, os.W_OK) == False:
+                    # exit/error message
+                    sys.exit("The current working directory is not writeable either.\n"
+                                "Exiting.")
+        else:
+            if newpath == filepath and newpath == cwd:
+                print("all the same dir") #debug
+            elif newpath != filepath and newpath == cwd:
+                print("current wd, cwd = " + cwd) #debug
+            else:
+                print("everything fine") #debug
+            pass
+    # ------------ end filename/path check mess
+
+    fileroot, extension = os.path.splitext(filename)
+    # check for file root and extension
+    if extension is "":
+        # status message
+        print("::: Attn: the provided file has no file extension")
+        separator = ""
+    else:
+        separator = "."
+        extsplit = extension.split(separator)
+        extension = extsplit[-1]
+    filename_out = newpath + fileroot + suffix + separator + extension
+    print("output file: " +filename_out)
+
+    #     # check for valid file types
+    # if (ext == "txt" or ext == "html"
+    #         or ext == "htm" or ext == "md"):
+    #     with open(filename, 'r', encoding='utf-8') as f:
+    #         print("------------")
+    #         print("Reading input file...")
+    #         # Markdown still unsupported
+    #         if ext == 'md':
+    #             print("Sorry, Markdown conversion is not yet supported. ):")
+    #             sys.exit()
+    #         if ext == 'htm' or ext == 'html':
+    #             # status message
+    #             print("Converting HTML to plaintext...")
+    #             # read in html file as one string
+    #             # and split at user-provided tag or string if present
+    #             html_string = f.read()
+    #             if args.begin:
+    #                 beginparse = args.begin
+    #                 html_split = html_string.split(beginparse, maxsplit=1)
+    #                 if len(html_split) > 1:
+    #                     html_stripped = html_to_text(html_split[1])
+    #                 else:
+    #                     # status message
+    #                     print("::: Attn: the starting point provided by you "
+    #                         "was _not_ found.")
+    #                     html_stripped = html_to_text(html_split[0])
+    #             else:
+    #                 html_stripped = html_to_text(html_string)
+    #             # create iterable list of lines
+    #             html_stripped_lines = html_stripped.splitlines(True)
+    #             with open(filename_out, 'w+', encoding='utf-8') as fout:
+    #                 fout.write(html_stripped)
+    #             # don't create any footnotes if --noref flag is set
+    #             # (only converts html to plaintext)
+    #             if args.noref:
+    #                 # status message
+    #                 print("DONE.\n")
+    #                 print("The output file is: {}" .format(fout.name))
+    #                 sys.exit()
+
+    #         with open(filename_out, 'w+', encoding='utf-8') as fout:
+    #             # status message
+    #             print("Creating footnotes...")
+    #             if ext == 'html' or ext == 'htm':
+    #                 source = html_stripped_lines
+    #             else:
+    #                 source = f
+    #             # iterate over all lines
+    #             for line in source:
+    #                 # if the current line does not mark an e-mail signature
+    #                 if line != "--\n":
+    #                     # search and substitute lines using regex
+    #                     # find all round and square brackets
+    #                     # find all square brackets within quotes
+    #                     line_out = re.sub(""
+    #                         "(?#check for round brackets)"
+    #                         "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
+    #                         "(?#check for square brackets inside regular quotation marks)"
+    #                         "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
+    #                         "(?#check for square brackets inside formatted quotation marks)"
+    #                         "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
+    #                         "(?#check for square brackets)"
+    #                         "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
+    #                             inspectbrackets, line)
+    #                     # write back all lines (changed or unchanged)
+    #                     fout.write(line_out)
+    #                 # include appendix before e-mail signature
+    #                 # if the current line marks such a signature (--)
+    #                 else:
+    #                     signature = 1
+    #                     if len(references) > 0:
+    #                         writeappendix()
+    #                     fout.write("\n" +line)
+    #             # include appendix at end if no signature was found
+    #             if signature == 0 and len(references) > 0:
+    #                 fout.write("\n\n")
+    #                 writeappendix()
+    #             # status message
+    #             print("DONE.\n")
+    #             print("The output file is: {}" .format(fout.name))
+    # other file type than .txt was used
+    # else:
+    #     print("You did not specify a valid file name.\n"
+    #     "Only .txt, .htm/.html and .md files can be converted.")
