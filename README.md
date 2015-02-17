@@ -45,14 +45,14 @@ Run the program with option ```-h``` or ```--help``` for detailed information on
 ##Caveats
 
 The program assumes that the following signify references that are to be turned into footnotes:
-* round brackets whose contents begin with a URL
-* any other text surrounded by square brackets
+* round brackets whose contents begin with URLs
+* most text surrounded by square brackets
 <br>
 
 It ignores:
-* any other text surrounded by round brackets (including any kind of nested brackets)
-* square brackets denoting errors (```[sic]``` or ```[sic!]```)
-* square brackets indicating modified quotes *if* they are inside double quotation marks (e.g. ```"Could you tell the [other dwarves] I said goodbye?"```)
+* any other text surrounded by round brackets (including the contents of any kind of nested brackets)
+* square brackets denoting errors: ```[sic]``` and ```[sic!]```
+* square brackets indicating modified quotes *if* they are inside double quotation marks, e.g. ```"Could you tell the [other dwarves] I said goodbye?"```
 <br>
 
 The script currently supports the conversion of regular **text** as well as **HTML** files. Adding support for **Markdown files** might happen at a later point.
