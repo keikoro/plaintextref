@@ -214,13 +214,34 @@ def newfilepath(**allpaths):
     # schema for pathname checks
     """
     while newpath == "":
-        pass
-
+        if argpath == oldpath:
+            newpath = oldpath
+            continue # continue at else statement in while-else
+        else:
+            if argpath is ... writable:
+                newpath = argpath
+                break # main program starts running here
+            else:
+                newpath = oldpath
+                continue # continue as else statement in while-else
     else:
-        pass
+        if newpath is ... writable:
+            pass # main program starts running here
+        else:
+            if newpath == cwd:
+                sys.exit("The directory (= the current directory) is not writable\n"
+                                    "Exiting.")
+            else:
+                # status msg
+                print("The directory is not writable, trying the cwd next.")
+                newpath = cwd
+                    if newpath is ... writable:
+                        pass # main program starts running here
+                    else:
+                        sys.exit("The current directory) is not writable.\n"
+                                    "Exiting.")
 
     """
-
 
     print("new path: " +newpath) #debug
     return newpath
