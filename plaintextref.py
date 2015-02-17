@@ -211,7 +211,7 @@ def newfilepath(**allpaths):
     else:
         newpath = oldpath
 
-    print("\nNew path: " + newpath)
+    print("new path: " +newpath) #debug
     return newpath
 
 
@@ -294,7 +294,7 @@ if __name__ == "__main__":
         f.close()
 
     newpath = newfilepath(oldpath=filepath, cwd=os.getcwd(), argpath=args.path)
-    print(newpath)
+    print("new path returned: " +newpath) #debug
 
 
     # newpath = ""
