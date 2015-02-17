@@ -263,10 +263,11 @@ if __name__ == "__main__":
         else:
             print(e)
     else:
-        f.close()
         filepath, filename = os.path.split(fullpath)
         if filepath[-1:] is not "/":
             filepath += '/'
+    finally:
+        f.close()
 
     # ------------ start filename/path check mess
     cwd = os.getcwd()
