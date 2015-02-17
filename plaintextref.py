@@ -207,9 +207,20 @@ def newfilepath(**allpaths):
         sys.exit("Argument missing. Please check your program code.")
 
     if argpath is not '':
-        newpath = argpath
+        pass
     else:
         newpath = oldpath
+
+    # schema for pathname checks
+    """
+    while newpath == "":
+        pass
+
+    else:
+        pass
+
+    """
+
 
     print("new path: " +newpath) #debug
     return newpath
