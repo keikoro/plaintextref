@@ -333,10 +333,13 @@ if __name__ == "__main__":
         else:
             if newpath == filepath and newpath == cwd:
                 # print("all the same dir") #debug
+                pass
             elif newpath != filepath and newpath == cwd:
                 # print("current wd, cwd = " + cwd) #debug
+                pass
             else:
                 # print("everything fine") #debug
+                pass
             pass
     # ------------ end filename/path check mess
 
