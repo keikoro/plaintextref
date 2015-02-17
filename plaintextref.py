@@ -207,45 +207,51 @@ def newfilepath(**allpaths):
         sys.exit("Argument missing. Please check your program code.")
 
     if argpath is not '':
-        pass
+        newpath = ""
     else:
         newpath = oldpath
 
     # schema for pathname checks
-    """
     while newpath == "":
         if argpath == oldpath:
             newpath = oldpath
             continue # continue at else statement in while-else
         else:
-            if argpath is ... writable:
+            if os.access(argpath, os.W_OK) == True:
                 newpath = argpath
                 break # main program starts running here
             else:
+                # status msg
+                print("The specified path is not a writable directory.\n"
+                    "Trying to save to the directory containing the original file.")
                 newpath = oldpath
                 continue # continue as else statement in while-else
     else:
-        if newpath is ... writable:
+        if os.access(newpath, os.W_OK) == True:
             pass # main program starts running here
         else:
             if newpath == cwd:
-                sys.exit("The directory (= the current directory) is not writable\n"
-                                    "Exiting.")
+                # error/exit msg
+                sys.exit("The directory containing the original file/\n"
+                            "the current working directory is not writable.\n"
+                            "Exiting.")
             else:
                 # status msg
-                print("The directory is not writable, trying the cwd next.")
-                newpath = cwd
-                    if newpath is ... writable:
+                print("The directory containing the original file is not writable.")
+                if argpath == oldpath or argpath == cwd:
+                    sys.exit("Exiting.")
+                else:
+                    print("Trying to save to the current working directory.")
+                    newpath = cwd
+                    if os.access(newpath, os.W_OK) == True:
+                        print("writable?")
                         pass # main program starts running here
                     else:
-                        sys.exit("The current directory) is not writable.\n"
+                        sys.exit("The current working directory is not writable.\n"
                                     "Exiting.")
-
-    """
 
     print("new path: " +newpath) #debug
     return newpath
-
 
 parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
@@ -264,7 +270,7 @@ See https://github.com/kerstin/plaintextref for a more detailed description.
 parser.add_argument("filename",
     help='''name of (path to) the file you want to convert;
 supported file types are: .txt, .html/.htm, .md''')
-parser.add_argument('-b','--begin', dest="begin", metavar="\nTEXT\n",
+parser.add_argument('-b','--begin', dest="begin", metavar="\"TEXT\"",
     help = '''define where to begin scanning an HTML file
 e.g. --begin \"<body>\",
 e.g. --b \"2 February 2015\"''')
@@ -321,8 +327,6 @@ if __name__ == "__main__":
             print(e)
     else:
         filepath, filename = os.path.split(fullpath)
-
-    finally:
         f.close()
 
     newpath = newfilepath(oldpath=filepath, cwd=os.getcwd(), argpath=args.path)
