@@ -170,11 +170,19 @@ def inspect_brackets(matchobj):
     brkts_sq_inquote = matchobj.group('sq_qu_reg')
     brkts_sq_inquote_2 = matchobj.group('sq_qu_form')
     brkts_sq_content = matchobj.group('sq')
-    brkts_sq_space = matchobj.group('sq_space')
-    if brkts_sq_space is None:
-        trail_space = " "
-    else:
-        trail_space = ""
+    # brkts_rd_space = matchobj.group('rd_space')
+    # brkts_rd_special = matchobj.group('rd_special')
+    # brkts_sq_space = matchobj.group('sq_space')
+    # brkts_sq_special = matchobj.group('sq_special')
+
+    # if brkts_rd_space is None and brkts_rd_special is None:
+    #     rd_space = " "
+    # else:
+    #     rd_space = ""
+    # if brkts_sq_space is None and brkts_sq_special is None:
+    #     sq_space = " "
+    # else:
+    #     sq_space = ""
     # regex search found round brackets
     if brkts_rd_content is not None:
         # verify brackets start with URL;
@@ -191,7 +199,7 @@ def inspect_brackets(matchobj):
                 counter += 1
                 refno = counter
                 references[brkts_rd_content] = refno
-            ref = "[" + str(refno) + "]" + trail_space
+            ref = "[" + str(refno) + "]"
             return ref
         # return original bracket content if it's not a URL
         else:
@@ -201,7 +209,6 @@ def inspect_brackets(matchobj):
         return fullref
     elif brkts_sq_content is not None:
         if brkts_sq_content != 'sic' and brkts_sq_content != 'sic!':
-
             if brkts_sq_content in references:
                 refno = references[brkts_sq_content]
                 # status msg
@@ -463,7 +470,7 @@ if __name__ == "__main__":
                             "(?#check for square brackets inside formatted quotation marks)"
                             "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
                             "(?#check for square brackets)"
-                            "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])(?P<sq_space> )",
+                            "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
                                 inspect_brackets, line)
                         # write back all lines (changed or unchanged)
                         fout.write(line_out)
