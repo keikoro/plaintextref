@@ -165,6 +165,7 @@ def inspect_brackets(matchobj):
     """
     global counter
     global references
+    global duplicate_ref
     fullref = matchobj.group(0)
     brkts_rd_content = matchobj.group('rd')
     brkts_sq_inquote = matchobj.group('sq_qu_reg')
@@ -192,9 +193,11 @@ def inspect_brackets(matchobj):
         if url.scheme != '' and url.netloc != '':
             if brkts_rd_content in references:
                 refno = references[brkts_rd_content]
-                # status msg
-                print("::: Note: Multiple occurrence of reference {}"
-                            .format(brkts_rd_content))
+                if brkts_rd_content not in duplicate_ref:
+                    # status msg
+                    print("::: Note: Multiple occurrence of reference {}"
+                                .format(brkts_rd_content))
+                    duplicate_ref.append(brkts_rd_content)
             else:
                 counter += 1
                 refno = counter
@@ -211,9 +214,11 @@ def inspect_brackets(matchobj):
         if brkts_sq_content != 'sic' and brkts_sq_content != 'sic!':
             if brkts_sq_content in references:
                 refno = references[brkts_sq_content]
-                # status msg
-                print("::: Note: Multiple occurrence of reference "
+                if brkts_sq_content not in duplicate_ref:
+                    # status msg
+                    print("::: Note: Multiple occurrence of reference "
                         "\"{}\"".format(brkts_sq_content))
+                    duplicate_ref.append(brkts_sq_content)
             else:
                 counter += 1
                 refno = counter
@@ -360,6 +365,7 @@ args = parser.parse_args()
 # add counter for references
 # add counter for e-mail signature
 references = OrderedDict()
+duplicate_ref = []
 suffix = "_plaintext"
 counter = 0
 signature = 0
@@ -387,10 +393,10 @@ if __name__ == "__main__":
 
     fileroot, extension = os.path.splitext(filename)
     # check for file root and extension
-    if extension is "":
+    if extension == '':
         # status msg
         print("::: Attn: the provided file has no file extension.")
-        separator = ""
+        separator = ''
     else:
         separator = "."
         extsplit = extension.split(separator)
