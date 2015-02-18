@@ -67,6 +67,8 @@ class HTMLClean(HTMLParser):
     def handle_starttag(self, tag, attrs):
         """Look for hyperlinks and filter out their href attribute.
         """
+        if tag == "br":
+            self.result.append('\n')
         if tag == "a":
             for attr in attrs:
                 if attr[0] == "href":
@@ -100,6 +102,10 @@ class HTMLClean(HTMLParser):
         Remove hyperlinks whose <a></a> tags surround other content.
         """
         count_data = len(self.result)
+        # linebreaks, paragraphs
+        if tag == "p":
+            self.result.append('\n\n')
+        # URL handling
         if tag == "a" and count_data >= 2:
             descriptions = []
             try:
@@ -477,7 +483,7 @@ if __name__ == "__main__":
                     write_appendix()
                     # status msg
                     print("Appendix created.")
-                else:
+                if len(references) <= 0:
                     # status msg
                     print("No references found.")
                 # status msg
