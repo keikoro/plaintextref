@@ -81,8 +81,9 @@ class HTMLClean(HTMLParser):
         """Add content enclosed within various HTML tags.
         """
         # strip whitespace produced by html indentation
-        data = re.sub('( +\n +)', ' ', data)
-        data = re.sub('(\n +)', '\n', data)
+        # data = re.sub('( +\n +)', ' ', data)
+        # data = re.sub('(\n +)', '\n', data)
+        data = data.lstrip()
         self.result.append(data)
 
     def handle_entityref(self, name):
@@ -103,6 +104,8 @@ class HTMLClean(HTMLParser):
         """
         count_data = len(self.result)
         # linebreaks, paragraphs
+        if tag == "div":
+            self.result.append('\n\n')
         if tag == "p":
             self.result.append('\n\n')
         # URL handling
@@ -167,6 +170,11 @@ def inspect_brackets(matchobj):
     brkts_sq_inquote = matchobj.group('sq_qu_reg')
     brkts_sq_inquote_2 = matchobj.group('sq_qu_form')
     brkts_sq_content = matchobj.group('sq')
+    brkts_sq_space = matchobj.group('sq_space')
+    if brkts_sq_space is None:
+        trail_space = " "
+    else:
+        trail_space = ""
     # regex search found round brackets
     if brkts_rd_content is not None:
         # verify brackets start with URL;
@@ -183,7 +191,7 @@ def inspect_brackets(matchobj):
                 counter += 1
                 refno = counter
                 references[brkts_rd_content] = refno
-            ref = "[" + str(refno) + "]"
+            ref = "[" + str(refno) + "]" + trail_space
             return ref
         # return original bracket content if it's not a URL
         else:
@@ -455,7 +463,7 @@ if __name__ == "__main__":
                             "(?#check for square brackets inside formatted quotation marks)"
                             "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
                             "(?#check for square brackets)"
-                            "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
+                            "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])(?P<sq_space> )",
                                 inspect_brackets, line)
                         # write back all lines (changed or unchanged)
                         fout.write(line_out)
