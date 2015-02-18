@@ -22,15 +22,38 @@
 #   (possibly then check for appendix, integrate existing footnotes via cli option)
 # - option to re-index an existing appendix / to combine old and new refs
 
+# Python2
+from __future__ import unicode_literals
+import copy
+# Python3 + Python2
 import sys
 import os
 import re
 import argparse
 import errno
-from urllib.parse import urlparse
 from collections import OrderedDict
-from html.parser import HTMLParser
-import html.entities
+
+try:
+    # Python2
+    from io import open
+except ImportError:
+    pass
+try:
+    from urllib.parse import urlparse
+# Python2
+except ImportError:
+    from urlparse import urlparse
+try:
+    from html.parser import HTMLParser
+# Python2
+except ImportError:
+    from HTMLParser import HTMLParser
+try:
+    import html.entities
+# Python2
+except ImportError:
+    import htmlentitydefs
+
 
 class HTMLClean(HTMLParser):
     """Class to clean HTML tags
@@ -63,8 +86,13 @@ class HTMLClean(HTMLParser):
     def handle_entityref(self, name):
         """Convert HTML entities to their Unicode representations.
         """
-        html_entities = html.entities.name2codepoint[name]
-        self.result.append(chr(html_entities))
+        try:
+            html_entities = html.entities.name2codepoint[name]
+            self.result.append(chr(html_entities))
+        # Python2
+        except:
+            html_entities = htmlentitydefs.name2codepoint[name]
+            self.result.append(unichr(html_entities))
 
     def handle_endtag(self, tag):
         """Look for hyperlinks whose <a></a> tags include a description,
@@ -74,7 +102,10 @@ class HTMLClean(HTMLParser):
         count_data = len(self.result)
         if tag == "a" and count_data >= 2:
             descriptions = []
-            urls_copy = self.urls.copy()
+            try:
+                urls_copy = self.urls.copy()
+            except:
+                urls_copy = copy.copy(self.urls)
             # remove hyperlink descriptions before closing </a> tags
             # if they do not belong to proper hyperlinks
             # + join hyperlink descriptions that belong together
@@ -96,7 +127,7 @@ class HTMLClean(HTMLParser):
                     else:
                         descriptions_collected = descriptions[0]
                     url = urlparse(last_url)
-                    if url.scheme is not '' and url.netloc is not '':
+                    if url.scheme != '' and url.netloc != '':
                         self.result.append(descriptions_collected)
                         self.result.append(" (" + last_url + ")")
         # remove any data that was inside <script> or <style> tags
@@ -136,12 +167,12 @@ def inspect_brackets(matchobj):
         # check for attributes: scheme (URL scheme specifier) and
         # netlocat (Network location part)
         url = urlparse(brkts_rd_content)
-        if url.scheme is not '' and url.netloc is not '':
+        if url.scheme != '' and url.netloc != '':
             if brkts_rd_content in references:
                 refno = references[brkts_rd_content]
                 # status msg
-                print("::: Note: Multiple occurrence of reference\n"
-                        "    {}".format(brkts_rd_content))
+                print("::: Note: Multiple occurrence of reference {}"
+                            .format(brkts_rd_content))
             else:
                 counter += 1
                 refno = counter
@@ -160,8 +191,8 @@ def inspect_brackets(matchobj):
             if brkts_sq_content in references:
                 refno = references[brkts_sq_content]
                 # status msg
-                print("::: Note: Multiple occurrence of reference\n"
-                        "    \"{}\"".format(brkts_sq_content))
+                print("::: Note: Multiple occurrence of reference "
+                        "\"{}\"".format(brkts_sq_content))
             else:
                 counter += 1
                 refno = counter
@@ -179,10 +210,16 @@ def write_appendix():
     """
     # separate footnotes with separator. use _ instead of dashes
     # as -- is read as the beginning of a signature by e-mail clients
-    fout.write("___\n")
+    try:
+        fout.write('___\n')
+    except TypeError:
+        fout.write(u'___\n')
     # write appendix/bibliography to output file
     for ref, no in references.items():
-        fout.write("[{}] {}\n" .format(no, ref))
+        try:
+            fout.write("[{}] {}\n" .format(no, ref))
+        except TypeError:
+            fout.write(u"[{}] {}\n" .format(no, ref))
 
 def newfilepath(**allpaths):
     """Check writability of the path provided for the output file.
@@ -361,7 +398,10 @@ if __name__ == "__main__":
                 html_string = f.read()
                 if args.begin:
                     beginparse = args.begin
-                    html_split = html_string.split(beginparse, maxsplit=1)
+                    try:
+                        html_split = html_string.split(beginparse, maxsplit=1)
+                    except TypeError:
+                        html_split = html_string.split(beginparse, 1)
                     if len(html_split) > 1:
                         if args.contain is True:
                             parsestring = beginparse + html_split[1]
@@ -424,10 +464,16 @@ if __name__ == "__main__":
                         else:
                             # status msg
                             print("No references found.")
-                        fout.write("\n" +line)
+                        try:
+                            fout.write('\n' +line)
+                        except:
+                            fout.write(u'\n' +line)
                 # include appendix at end if no signature was found
                 if signature == 0 and len(references) > 0:
-                    fout.write("\n\n")
+                    try:
+                        fout.write('\n\n')
+                    except:
+                        fout.write(u'\n\n')
                     write_appendix()
                     # status msg
                     print("Appendix created.")
