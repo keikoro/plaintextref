@@ -17,8 +17,6 @@
 # original citations as well as [sic] and [sic!] are ignored.
 #
 # TODO:
-# - problem with missing spaces between brackets and words following them
-#   (observed on html pages with weird formatting)
 # - option to re-index an existing appendix / to combine old and new refs
 # - ignore or warn on square brackets containing only digits
 #   as these might already be footnotes
@@ -169,23 +167,32 @@ def inspect_brackets(matchobj):
     global references
     global duplicate_ref
     fullref = matchobj.group(0)
-    brkts_rd_content = matchobj.group('rd')
     brkts_sq_inquote = matchobj.group('sq_qu_reg')
     brkts_sq_inquote_2 = matchobj.group('sq_qu_form')
-    brkts_sq_content = matchobj.group('sq')
-    # brkts_rd_space = matchobj.group('rd_space')
-    # brkts_rd_special = matchobj.group('rd_special')
-    # brkts_sq_space = matchobj.group('sq_space')
-    # brkts_sq_special = matchobj.group('sq_special')
 
-    # if brkts_rd_space is None and brkts_rd_special is None:
-    #     rd_space = " "
-    # else:
-    #     rd_space = ""
-    # if brkts_sq_space is None and brkts_sq_special is None:
-    #     sq_space = " "
-    # else:
-    #     sq_space = ""
+    # round content dependent on which round brackets match
+    if matchobj.group('rd') is not None:
+        brkts_rd_content = matchobj.group('rd')
+    elif matchobj.group('rd_w') is not None:
+        brkts_rd_content = matchobj.group('rd_w')
+    else:
+        brkts_rd_content = None
+    # square content dependent on which square brackets match
+    if matchobj.group('sq') is not None:
+        brkts_sq_content = matchobj.group('sq')
+    elif matchobj.group('sq_w') is not None:
+        brkts_sq_content = matchobj.group('sq_w')
+    else:
+        brkts_sq_content = None
+    # append space or not
+    if matchobj.group('rd_word') is not None:
+        brkts_append = ' ' + matchobj.group('rd_word')
+    elif matchobj.group('sq_word') is not None:
+        print("yo")
+        brkts_append = ' ' + matchobj.group('sq_word')
+    else:
+        brkts_append = ''
+
     # regex search found round brackets
     if brkts_rd_content is not None:
         # verify brackets start with URL;
@@ -204,7 +211,7 @@ def inspect_brackets(matchobj):
                 counter += 1
                 refno = counter
                 references[brkts_rd_content] = refno
-            ref = "[" + str(refno) + "]"
+            ref = "[" + str(refno) + "]" + brkts_append
             return ref
         # return original bracket content if it's not a URL
         else:
@@ -225,7 +232,7 @@ def inspect_brackets(matchobj):
                 counter += 1
                 refno = counter
                 references[brkts_sq_content] = refno
-            ref = "[" + str(refno) + "]"
+            ref = "[" + str(refno) + "]" + brkts_append
             return ref
         else:
             return fullref
@@ -471,14 +478,18 @@ if __name__ == "__main__":
                         # find all round and square brackets
                         # find all square brackets within quotes
                         line_out = re.sub(""
-                            "(?#check for round brackets)"
+                            "(?#check for round brackets directly followed by word)"
+                            "([ ]*[\(])(?P<rd_w>[^\(\)]*)([\)])(?P<rd_word>\w)"
+                            "|(?#check for round brackets)"
                             "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
-                            "(?#check for square brackets inside regular quotation marks)"
-                            "|([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
-                            "(?#check for square brackets inside formatted quotation marks)"
-                            "|([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
-                            "(?#check for square brackets)"
-                            "|([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
+                            "|(?#check for square brackets inside regular quotation marks)"
+                            "([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
+                            "|(?#check for square brackets inside formatted quotation marks)"
+                            "([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
+                            "|(?#check for square brackets directly followed by word)"
+                            "([ ]*[\[])(?P<sq_w>[^\[\]]*)([\]](?P<sq_word>\w))"
+                            "|(?#check for square brackets)"
+                            "([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
                                 inspect_brackets, line)
                         # write back all lines (changed or unchanged)
                         fout.write(line_out)
