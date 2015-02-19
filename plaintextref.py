@@ -1,16 +1,16 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Convert in-text references (URLs) to sequentially numbered footnotes and
+# Convert in-text references to sequentially numbered footnotes and
 # change text-based files (like HTML) to proper plaintext in the process.
 #
 # Copyright (c) 2015 K Kollmann <code∆k.kollmann·moe>
 # License: http://opensource.org/licenses/MIT The MIT License (MIT)
 
-# You need to have Python 3.x installed to run this script.
+# Usage:
 # Use -h or --help for help on how to use the program.
 #
-# The script currently supports conversion of .txt and .html/.htm files.
+# The script currently supports conversion of text and HTML files.
 # Round brackets containing URLs and square brackets get converted
 # to footnotes. Round brackets containing other text (including any nested
 # brackets) and square brackets within quotes to denote changes to
