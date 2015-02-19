@@ -71,7 +71,7 @@ class HTMLClean(HTMLParser):
             self.result.append('\n')
         if tag == "a":
             for attr in attrs:
-                if attr[0] == "href":
+                if attr[0] == 'href':
                     the_url = attr[1].strip()
                     if the_url:
                         self.urls.append(the_url)
@@ -167,29 +167,25 @@ def inspect_brackets(matchobj):
     global references
     global duplicate_ref
     fullref = matchobj.group(0)
-    brkts_sq_inquote = matchobj.group('sq_qu_reg')
-    brkts_sq_inquote_2 = matchobj.group('sq_qu_form')
+    brkts_rd_content = matchobj.group('rd')
+    brkts_sq_content = matchobj.group('sq')
+    brkts_rd_spacemissing = matchobj.group('rd_word')
+    brkts_sq_spacemissing = matchobj.group('sq_word')
+    brkts_sq_quote = matchobj.group('sq_qu_quotes')
+    brkts_sq_quopen = matchobj.group('sq_qu_open')
+    brkts_sq_quclose = matchobj.group('sq_qu_close')
 
-    # round content dependent on which round brackets match
-    if matchobj.group('rd') is not None:
-        brkts_rd_content = matchobj.group('rd')
-    elif matchobj.group('rd_w') is not None:
-        brkts_rd_content = matchobj.group('rd_w')
-    else:
-        brkts_rd_content = None
-    # square content dependent on which square brackets match
-    if matchobj.group('sq') is not None:
-        brkts_sq_content = matchobj.group('sq')
-    elif matchobj.group('sq_w') is not None:
-        brkts_sq_content = matchobj.group('sq_w')
-    else:
-        brkts_sq_content = None
-    # append space or not
-    if matchobj.group('rd_word') is not None:
-        brkts_append = ' ' + matchobj.group('rd_word')
-    elif matchobj.group('sq_word') is not None:
-        print("yo")
-        brkts_append = ' ' + matchobj.group('sq_word')
+    if brkts_sq_quopen is not None:
+        brkts_sq_quopen = "\""
+    if brkts_sq_quclose is not None:
+        brkts_sq_quclose = "\""
+
+    # append space if word follows immediately after brackets
+    if brkts_rd_spacemissing is not None and brkts_rd_spacemissing is not '':
+        print(brkts_rd_spacemissing)
+        brkts_append = ' ' + brkts_rd_spacemissing
+    elif brkts_sq_spacemissing is not None and brkts_sq_spacemissing is not '':
+        brkts_append = ' ' + brkts_sq_spacemissing
     else:
         brkts_append = ''
 
@@ -216,9 +212,11 @@ def inspect_brackets(matchobj):
         # return original bracket content if it's not a URL
         else:
             return fullref
+    # regex search found square brackets in quotations marks
+    elif brkts_sq_quote is not None:
+        ref = brkts_sq_quopen + brkts_sq_quote + brkts_sq_quclose
+        return ref
     # regex search found square brackets
-    elif brkts_sq_inquote is not None or brkts_sq_inquote_2 is not None:
-        return fullref
     elif brkts_sq_content is not None:
         if brkts_sq_content != 'sic' and brkts_sq_content != 'sic!':
             if brkts_sq_content in references:
@@ -234,9 +232,10 @@ def inspect_brackets(matchobj):
                 references[brkts_sq_content] = refno
             ref = "[" + str(refno) + "]" + brkts_append
             return ref
+        # return original bracket content if not a match
         else:
             return fullref
-    # regex search did not find any brackets in this line
+    # regex search did not find any brackets
     else:
         return fullref
 
@@ -438,6 +437,7 @@ if __name__ == "__main__":
                         html_split = html_string.split(beginparse, maxsplit=1)
                     except TypeError:
                         html_split = html_string.split(beginparse, 1)
+
                     if len(html_split) > 1:
                         if args.contain is True:
                             parsestring = beginparse + html_split[1]
@@ -478,18 +478,12 @@ if __name__ == "__main__":
                         # find all round and square brackets
                         # find all square brackets within quotes
                         line_out = re.sub(""
-                            "(?#check for round brackets directly followed by word)"
-                            "([ ]*[\(])(?P<rd_w>[^\(\)]*)([\)])(?P<rd_word>\w)"
-                            "|(?#check for round brackets)"
-                            "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])"
-                            "|(?#check for square brackets inside regular quotation marks)"
-                            "([\"][^\"[]*)([\[])(?P<sq_qu_reg>[^\"\]]+)([\]])([^\"]*[\"])"
-                            "|(?#check for square brackets inside formatted quotation marks)"
-                            "([“][^“”[]*)([\[])(?P<sq_qu_form>[^”\]]+)([\]])([^”]*[”])"
-                            "|(?#check for square brackets directly followed by word)"
-                            "([ ]*[\[])(?P<sq_w>[^\[\]]*)([\]](?P<sq_word>\w))"
+                            "(?#check for round brackets)"
+                            "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])(?P<rd_word>\w*)"
+                            "|(?#check for square brackets inside quotation marks)"
+                            "(?P<sq_qu_open>([“]|[\"]))(?P<sq_qu_quotes>([^\"“”[]*)([\[])([^\"“”\]]+)([\]])([^“”\"]*))(?P<sq_qu_close>([”]|[\"]))"
                             "|(?#check for square brackets)"
-                            "([ ]*[\[])(?P<sq>[^\[\]]*)([\]])",
+                            "([ ]*[\[])(?P<sq>[^\[\]]*)([\]])(?P<sq_word>\w*)",
                                 inspect_brackets, line)
                         # write back all lines (changed or unchanged)
                         fout.write(line_out)
