@@ -17,10 +17,12 @@
 # original citations as well as [sic] and [sic!] are ignored.
 #
 # TODO:
+# - problem with missing spaces between brackets and words following them
+#   (observed on html pages with weird formatting)
+# - option to re-index an existing appendix / to combine old and new refs
 # - ignore or warn on square brackets containing only digits
 #   as these might already be footnotes
 #   (possibly then check for appendix, integrate existing footnotes via cli option)
-# - option to re-index an existing appendix / to combine old and new refs
 
 # Python2
 from __future__ import unicode_literals
