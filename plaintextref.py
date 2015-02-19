@@ -179,10 +179,8 @@ def inspect_brackets(matchobj):
         brkts_sq_quopen = "\""
     if brkts_sq_quclose is not None:
         brkts_sq_quclose = "\""
-
     # append space if word follows immediately after brackets
     if brkts_rd_spacemissing is not None and brkts_rd_spacemissing is not '':
-        print(brkts_rd_spacemissing)
         brkts_append = ' ' + brkts_rd_spacemissing
     elif brkts_sq_spacemissing is not None and brkts_sq_spacemissing is not '':
         brkts_append = ' ' + brkts_sq_spacemissing
