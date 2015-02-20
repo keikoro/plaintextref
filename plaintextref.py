@@ -73,17 +73,14 @@ class HTMLClean(HTMLParser):
             for attr in attrs:
                 if attr[0] == 'href':
                     the_url = attr[1].strip()
-                    if the_url:
+                    url = urlparse(the_url)
+                    if url.scheme != '' and url.netloc != '':
                         self.urls.append(the_url)
                         self.result.append(the_url)
 
     def handle_data(self, data):
         """Add content enclosed within various HTML tags.
         """
-        # strip whitespace produced by html indentation
-        # data = re.sub('( +\n +)', ' ', data)
-        # data = re.sub('(\n +)', '\n', data)
-        data = data.lstrip()
         self.result.append(data)
 
     def handle_entityref(self, name):
@@ -151,8 +148,13 @@ class HTMLClean(HTMLParser):
         fulltext = u''.join(self.result)
         fulltext = fulltext.lstrip()
         fulltext = fulltext.rstrip()
-        fulltext = re.sub('(\w)( *)(\n)(\w)', r'\1 \4', fulltext)
-        fulltext = re.sub('( *\n\n+ *)', '\n\n', fulltext)
+        fulltext = re.sub('(\w)[ \t]*\n[ \t]*(\w)', r'\1 \2', fulltext)
+        fulltext = re.sub('(\S)([ \t]*\n[ \t]+|[ \t]*\n[ \t]+)(\S)', r'\1 \3', fulltext)
+        fulltext = re.sub('([ \t]*\n[ \t]+|[ \t]*\n[ \t]+)', ' ', fulltext)
+        fulltext = re.sub('([ \t]*\n\n[ \t]+|[ \t]*\n\n[ \t]+)', '\n\n', fulltext)
+        fulltext = re.sub('([\t ]*\n[\n \t]+)', '\n\n', fulltext)
+        fulltext = re.sub('[ \t]+', ' ', fulltext)
+        fulltext = re.sub('([\n]{2,})', '\n\n', fulltext)
         return fulltext
 
 def html_to_text(html):
@@ -435,7 +437,6 @@ if __name__ == "__main__":
                         html_split = html_string.split(beginparse, maxsplit=1)
                     except TypeError:
                         html_split = html_string.split(beginparse, 1)
-
                     if len(html_split) > 1:
                         if args.contain is True:
                             parsestring = beginparse + html_split[1]
