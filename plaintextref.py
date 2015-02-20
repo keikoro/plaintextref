@@ -33,23 +33,26 @@ try:
     # Python2
     from io import open
 except ImportError:
+    # Python3
     pass
 try:
+    # Python3
     from urllib.parse import urlparse
-# Python2
 except ImportError:
+    # Python2
     from urlparse import urlparse
 try:
+    # Python3
     from html.parser import HTMLParser
-# Python2
 except ImportError:
+    # Python2
     from HTMLParser import HTMLParser
 try:
+    # Python3
     import html.entities
-# Python2
 except ImportError:
+    # Python2
     import htmlentitydefs
-
 
 class HTMLClean(HTMLParser):
     """Class to clean HTML tags
