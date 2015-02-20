@@ -164,101 +164,6 @@ def html_to_text(html):
     content.feed(html)
     return content.concatenate()
 
-def inspect_brackets(matchobj):
-    """Further break down any regex matches for brackets.
-    """
-    global counter
-    global references
-    global duplicate_ref
-    fullref = matchobj.group(0)
-    brkts_rd_content = matchobj.group('rd')
-    brkts_sq_content = matchobj.group('sq')
-    brkts_rd_spacemissing = matchobj.group('rd_word')
-    brkts_sq_spacemissing = matchobj.group('sq_word')
-    brkts_sq_quote = matchobj.group('sq_qu_quotes')
-    brkts_sq_quopen = matchobj.group('sq_qu_open')
-    brkts_sq_quclose = matchobj.group('sq_qu_close')
-
-    if brkts_sq_quopen is not None:
-        brkts_sq_quopen = "\""
-    if brkts_sq_quclose is not None:
-        brkts_sq_quclose = "\""
-    # append space if word follows immediately after brackets
-    if brkts_rd_spacemissing is not None and brkts_rd_spacemissing is not '':
-        brkts_append = ' ' + brkts_rd_spacemissing
-    elif brkts_sq_spacemissing is not None and brkts_sq_spacemissing is not '':
-        brkts_append = ' ' + brkts_sq_spacemissing
-    else:
-        brkts_append = ''
-
-    # regex search found round brackets
-    if brkts_rd_content is not None:
-        # verify brackets start with URL;
-        # check for attributes: scheme (URL scheme specifier) and
-        # netlocat (Network location part)
-        url = urlparse(brkts_rd_content)
-        if url.scheme != '' and url.netloc != '':
-            if brkts_rd_content in references:
-                refno = references[brkts_rd_content]
-                if brkts_rd_content not in duplicate_ref:
-                    # status msg
-                    print("::: Note: Multiple occurrence of reference {}"
-                                .format(brkts_rd_content))
-                    duplicate_ref.append(brkts_rd_content)
-            else:
-                counter += 1
-                refno = counter
-                references[brkts_rd_content] = refno
-            ref = "[" + str(refno) + "]" + brkts_append
-            return ref
-        # return original bracket content if it's not a URL
-        else:
-            return fullref
-    # regex search found square brackets in quotations marks
-    elif brkts_sq_quote is not None:
-        ref = brkts_sq_quopen + brkts_sq_quote + brkts_sq_quclose
-        return ref
-    # regex search found square brackets
-    elif brkts_sq_content is not None:
-        if brkts_sq_content == 'sic' and brkts_sq_content == 'sic!':
-            # return original bracket content if not a match
-            return fullref
-        else:
-            # if brkts_sq_content == '1':
-            #     print("warning, there already is a [1]")
-            if brkts_sq_content in references:
-                refno = references[brkts_sq_content]
-                if brkts_sq_content not in duplicate_ref:
-                    # status msg
-                    print("::: Note: Multiple occurrence of reference "
-                        "\"{}\"".format(brkts_sq_content))
-                    duplicate_ref.append(brkts_sq_content)
-            else:
-                counter += 1
-                refno = counter
-                references[brkts_sq_content] = refno
-            ref = "[" + str(refno) + "]" + brkts_append
-            return ref
-    # regex search did not find any brackets
-    else:
-        return fullref
-
-def write_appendix():
-    """Write an appendix (list of references/footnotes).
-    """
-    # separate footnotes with separator. use _ instead of dashes
-    # as -- is read as the beginning of a signature by e-mail clients
-    try:
-        fout.write('___\n')
-    except TypeError:
-        fout.write(u'___\n')
-    # write appendix/bibliography to output file
-    for ref, no in references.items():
-        try:
-            fout.write("[{}] {}\n" .format(no, ref))
-        except TypeError:
-            fout.write(u"[{}] {}\n" .format(no, ref))
-
 def newfilepath(**allpaths):
     """Check writability of the path provided for output file.
     """
@@ -324,6 +229,109 @@ def newfilepath(**allpaths):
                                     "Exiting.")
     return newpath
 
+def write_appendix():
+    """Write an appendix (list of references/footnotes).
+    """
+    # separate footnotes with separator. use _ instead of dashes
+    # as -- is read as the beginning of a signature by e-mail clients
+    try:
+        fout.write('___\n')
+    except TypeError:
+        fout.write(u'___\n')
+    # write appendix/bibliography to output file
+    for ref, no in references.items():
+        try:
+            fout.write("[{}] {}\n" .format(no, ref))
+        except TypeError:
+            fout.write(u"[{}] {}\n" .format(no, ref))
+
+def inspect_brackets(matchobj):
+    """Further break down any regex matches for brackets.
+    """
+    global counter
+    global references
+    global duplicate_ref
+    fullref = matchobj.group(0)
+    brkts_rd_content = matchobj.group('rd')
+    brkts_sq_content = matchobj.group('sq')
+    brkts_rd_spacemissing = matchobj.group('rd_word')
+    brkts_sq_spacemissing = matchobj.group('sq_word')
+    brkts_sq_quote = matchobj.group('sq_qu_quotes')
+    brkts_sq_quopen = matchobj.group('sq_qu_open')
+    brkts_sq_quclose = matchobj.group('sq_qu_close')
+
+    if brkts_sq_quopen is not None:
+        brkts_sq_quopen = "\""
+    if brkts_sq_quclose is not None:
+        brkts_sq_quclose = "\""
+    # append space if word follows immediately after brackets
+    if brkts_rd_spacemissing is not None and brkts_rd_spacemissing is not '':
+        brkts_append = ' ' + brkts_rd_spacemissing
+    elif brkts_sq_spacemissing is not None and brkts_sq_spacemissing is not '':
+        brkts_append = ' ' + brkts_sq_spacemissing
+    else:
+        brkts_append = ''
+
+    # regex search found round brackets
+    if brkts_rd_content is not None:
+        # verify brackets start with URL;
+        # check for attributes: scheme (URL scheme specifier) and
+        # netlocat (Network location part)
+        url = urlparse(brkts_rd_content)
+        if url.scheme != '' and url.netloc != '':
+            if brkts_rd_content in references:
+                refno = references[brkts_rd_content]
+                if brkts_rd_content not in duplicate_ref:
+                    # status msg
+                    print("::: Note: multiple occurrence of reference {}"
+                                .format(brkts_rd_content))
+                    duplicate_ref.append(brkts_rd_content)
+            else:
+                counter += 1
+                refno = counter
+                references[brkts_rd_content] = refno
+            ref = "[" + str(refno) + "]" + brkts_append
+            return ref
+        # return original bracket content if it's not a URL
+        else:
+            return fullref
+    # regex search found square brackets in quotations marks
+    elif brkts_sq_quote is not None:
+        ref = brkts_sq_quopen + brkts_sq_quote + brkts_sq_quclose
+        return ref
+    # regex search found square brackets
+    elif brkts_sq_content is not None:
+        if brkts_sq_content == 'sic' and brkts_sq_content == 'sic!':
+            # return original bracket content if not a match
+            return fullref
+        else:
+            # if brkts_sq_content == '1':
+            #     print("warning, there already is a [1]")
+            if brkts_sq_content in references:
+                refno = references[brkts_sq_content]
+                if brkts_sq_content not in duplicate_ref:
+                    # status msg
+                    print("::: Note: multiple occurrence of reference "
+                        "\"{}\"".format(brkts_sq_content))
+                    duplicate_ref.append(brkts_sq_content)
+            else:
+                counter += 1
+                refno = counter
+                references[brkts_sq_content] = refno
+            ref = "[" + str(refno) + "]" + brkts_append
+            return ref
+    # regex search did not find any brackets
+    else:
+        return fullref
+
+
+def existing_appendix(matchobj):
+    """Incorporate existing references into a new appendix.
+    """
+
+
+
+
 # parse and interpret any command line arguments received
 parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
@@ -381,6 +389,7 @@ args = parser.parse_args()
 # add counter for e-mail signature
 references = OrderedDict()
 duplicate_ref = []
+appendix_old = []
 suffix = "_plaintext"
 counter = 0
 signature = 0
@@ -478,8 +487,8 @@ if __name__ == "__main__":
                 # iterate over all lines
                 for line in source:
                     # if the current line does not mark an e-mail signature
-                    if line != "--\n":
-                        # search and substitute lines using regex:
+                    if line != '--\n':
+                        # search lines and substitute text using regex:
                         # find all round and square brackets
                         # find square brackets within quotes
                         line_out = re.sub(""
