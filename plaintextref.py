@@ -145,10 +145,9 @@ class HTMLClean(HTMLParser):
     def concatenate(self):
         """Concatenate all individual pieces of data,
         trim whitespace at beginning and end of file and
-        remove any remaining weird newline formatting.
+        remove various whitespace combinations found in HTML.
         """
         fulltext = u''.join(self.result)
-        # get rid of various whitespace combinations in HTML
         fulltext = fulltext.lstrip()
         fulltext = fulltext.rstrip()
         fulltext = re.sub('(\w)[ \t]*\n[ \t]*(\w)', r'\1 \2', fulltext)
@@ -166,7 +165,7 @@ def html_to_text(html):
     return content.concatenate()
 
 def inspect_brackets(matchobj):
-    """Further break down the regex matches for brackets and quotes.
+    """Further break down any regex matches for brackets.
     """
     global counter
     global references
@@ -261,16 +260,16 @@ def write_appendix():
             fout.write(u"[{}] {}\n" .format(no, ref))
 
 def newfilepath(**allpaths):
-    """Check writability of the path provided for the output file.
+    """Check writability of the path provided for output file.
     """
     for key in allpaths:
-        # append missing / to paths
+        # append missing '/' to paths
         try:
             if allpaths[key] is not "" and allpaths[key][-1:] is not '/':
                 allpaths[key] += '/'
         except:
             allpaths[key] = ''
-        # replace leading ~ with HOME dir in paths input as string
+        # replace leading ~ with HOME directory in paths input as string
         if allpaths[key].find("~") != -1:
             allpaths[key] = os.path.expanduser(allpaths[key])
     try:
@@ -305,7 +304,6 @@ def newfilepath(**allpaths):
             pass # main program starts running here
         else:
             if newpath == cwd:
-                # error/exit msg
                 sys.exit("The directory containing the original file/\n"
                             "the current working directory is not writable.\n"
                             "Exiting.")
@@ -315,6 +313,7 @@ def newfilepath(**allpaths):
                 if argpath == oldpath or argpath == cwd:
                     sys.exit("Exiting.")
                 else:
+                    # status msg
                     print("Trying to save to the current working directory.")
                     newpath = cwd
                     if os.access(newpath, os.W_OK) == True:
@@ -325,6 +324,7 @@ def newfilepath(**allpaths):
                                     "Exiting.")
     return newpath
 
+# parse and interpret any command line arguments received
 parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
         description = '''---------------
@@ -375,6 +375,8 @@ useful if you just want to strip HTML tags''')
 args = parser.parse_args()
 
 # create an ordered dictionary to store all references
+# create a list to keep track of duplicate references
+# add default suffix for output files
 # add counter for references
 # add counter for e-mail signature
 references = OrderedDict()
@@ -384,7 +386,6 @@ counter = 0
 signature = 0
 
 if __name__ == "__main__":
-
     fullpath = os.path.realpath(args.filename)
     # validate provided filename
     try:
@@ -478,9 +479,9 @@ if __name__ == "__main__":
                 for line in source:
                     # if the current line does not mark an e-mail signature
                     if line != "--\n":
-                        # search and substitute lines using regex
+                        # search and substitute lines using regex:
                         # find all round and square brackets
-                        # find all square brackets within quotes
+                        # find square brackets within quotes
                         line_out = re.sub(""
                             "(?#check for round brackets)"
                             "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])(?P<rd_word>\w*)"
@@ -522,4 +523,4 @@ if __name__ == "__main__":
                 print("DONE.")
                 print("The output file is: {}" .format(fout.name))
     else:
-        print("File size must be below 2MB.")
+        sys.exit("File size must be below 2MB.")
