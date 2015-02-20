@@ -1,7 +1,6 @@
 # plaintextref
 
-A Python3 program which converts in-text references (citations, URLs) in 
-.txt and .html/.htm files to sequentially numbered footnotes for better readability.
+A Python3/Python program which converts in-text references (citations, URLs) in text-based files to sequentially numbered footnotes for better readability.
 
 HTML files get stripped of their tags and changed to proper plaintext in the process.
 
@@ -28,7 +27,7 @@ This program is particularly useful for making texts like e-mails containing a h
 
 At the same time, the user writing such texts is not required to change their writing habits too much: URLs are put into (regular, round) brackets like they usually might, asides which are better left in the running text can also be kept in round brackets, only citations that should explicitely be converted to footnotes need to be enclosed in square brackets (which are normally lesser-used punctuation marks).
 
-Another purpose of this program is the conversion of HTML-formatted e-mails or texts to plain text for better sharing via mailing lists which only support or prefer the sending of plain text e-mails.
+Another purpose of this program is the conversion of HTML-formatted e-mails or texts to plaintext for better sharing via mailing lists which only support or prefer the sending of plaintext e-mails.
 
 
 ## Usage
@@ -55,7 +54,7 @@ It ignores:
 * square brackets indicating modified quotes *if* they are inside double quotation marks, e.g. ```"Could you tell the [other dwarves] I said goodbye?"```
 <br><br>
 
-The script currently supports the conversion of regular **text** files as well as **HTML** files. Adding support for **Markdown files** might happen at a later point.
+The script currently supports the conversion of regular **text** files as well as **HTML** files. Adding support for **Markdown files** might happen at a later point. See also [#1](/../../issues/1).
 
 <br>
 <hr>
