@@ -229,8 +229,8 @@ def inspect_brackets(matchobj):
             # return original bracket content if not a match
             return fullref
         else:
-            if brkts_sq_content == '1':
-                print("warning, there already is a [1]")
+            # if brkts_sq_content == '1':
+            #     print("warning, there already is a [1]")
             if brkts_sq_content in references:
                 refno = references[brkts_sq_content]
                 if brkts_sq_content not in duplicate_ref:
