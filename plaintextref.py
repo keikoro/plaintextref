@@ -150,6 +150,7 @@ class HTMLClean(HTMLParser):
         remove any remaining weird newline formatting.
         """
         fulltext = u''.join(self.result)
+        # get rid of various whitespace combinations in HTML
         fulltext = fulltext.lstrip()
         fulltext = fulltext.rstrip()
         fulltext = re.sub('(\w)[ \t]*\n[ \t]*(\w)', r'\1 \2', fulltext)
@@ -222,7 +223,12 @@ def inspect_brackets(matchobj):
         return ref
     # regex search found square brackets
     elif brkts_sq_content is not None:
-        if brkts_sq_content != 'sic' and brkts_sq_content != 'sic!':
+        if brkts_sq_content == 'sic' and brkts_sq_content == 'sic!':
+            # return original bracket content if not a match
+            return fullref
+        else:
+            if brkts_sq_content == '1':
+                print("warning, there already is a [1]")
             if brkts_sq_content in references:
                 refno = references[brkts_sq_content]
                 if brkts_sq_content not in duplicate_ref:
@@ -236,9 +242,6 @@ def inspect_brackets(matchobj):
                 references[brkts_sq_content] = refno
             ref = "[" + str(refno) + "]" + brkts_append
             return ref
-        # return original bracket content if not a match
-        else:
-            return fullref
     # regex search did not find any brackets
     else:
         return fullref
