@@ -324,13 +324,38 @@ def inspect_brackets(matchobj):
     else:
         return fullref
 
+def parse_oldrefs(matchobj):
+    """Parse existing references.
+    """
+    fullref = matchobj.group(0)
+    oldno = matchobj.group(1)
+    oldref = matchobj.group(2)
 
-def existing_appendix(matchobj):
+    if oldref is not None and oldref is not '':
+        appendix_old[oldref] = oldno
+        print(oldref)
+        return oldref
+    else:
+        print("not found")
+        return fullref
+
+
+def old_refs(sourcefile):
     """Incorporate existing references into a new appendix.
     """
+    findapp = 0
+    # with open(sourcefile, 'r', encoding='utf-8') as f:
+    for line in sourcefile:
+        # appendix found
+        if line == '___\n':
+            findapp = 1
+            # status msg
+            print("Old appendix found!")
+        if findapp == 1:
+            oldref = re.sub('\[(\d+)\] *(.+)', parse_oldrefs, line)
 
-
-
+    if findapp == 1:
+        print(appendix_old)
 
 # parse and interpret any command line arguments received
 parser = argparse.ArgumentParser(
@@ -373,10 +398,10 @@ parser.add_argument('-p','--path', dest="path",
     help = '''path to save the converted file to if you do not want to
 save it in the same directory as the original file
 ''')
-# parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
-#     help = '''if there are already footnotes and an appendix present,
-# renumber existing references and incorporate them
-# into a new appendix including both old and new references''')
+parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
+    help = '''if there are already footnotes and an appendix present,
+renumber existing references and incorporate them
+into a new appendix including both old and new references''')
 parser.add_argument('-n','--noref', dest="noref", action="store_true",
     help = '''convert the file to plaintext, but don't create an appendix;
 useful if you just want to strip HTML tags''')
@@ -388,8 +413,8 @@ args = parser.parse_args()
 # add counter for references
 # add counter for e-mail signature
 references = OrderedDict()
+appendix_old = OrderedDict()
 duplicate_ref = []
-appendix_old = []
 suffix = "_plaintext"
 counter = 0
 signature = 0
@@ -477,13 +502,22 @@ if __name__ == "__main__":
                     print("The output file is: {}" .format(fout.name))
                     sys.exit()
 
+            # actual conversion of refs
             with open(filename_out, 'w+', encoding='utf-8') as fout:
-                # status msg
-                print("Looking for references...")
                 if extension == 'html' or extension == 'htm':
                     source = html_stripped_lines
                 else:
                     source = f
+                # find old appendix on -r, --re-index flag
+                if (args.reindex):
+                    # status message
+                    print("Looking for existing appendix...")
+                    old_refs(source)
+                    # status msg
+                    print("Looking for new references...")
+                else:
+                    # status msg
+                    print("Looking for references...")
                 # iterate over all lines
                 for line in source:
                     # if the current line does not mark an e-mail signature
