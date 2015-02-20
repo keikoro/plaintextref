@@ -199,9 +199,9 @@ def newfilepath(**allpaths):
                 newpath = argpath
                 break # main program starts running here
             else:
-                # status msg
                 print("The specified path is not a writable directory.\n"
-                    "Trying to save to the directory containing the original file.")
+                    "Trying to save to the directory containing "
+                    "the original file.") # status msg
                 newpath = oldpath
                 continue # continue as else statement in while-else
     else:
@@ -213,13 +213,13 @@ def newfilepath(**allpaths):
                             "the current working directory is not writable.\n"
                             "Exiting.")
             else:
-                # status msg
-                print("The directory containing the original file is not writable.")
+                print("The directory containing the original file "
+                        "is not writable.") # status msg
                 if argpath == oldpath or argpath == cwd:
                     sys.exit("Exiting.")
                 else:
-                    # status msg
-                    print("Trying to save to the current working directory.")
+                    print("Trying to save to the current "
+                            "working directory.") # status msg
                     newpath = cwd
                     if os.access(newpath, os.W_OK) == True:
                         print("writable?")
@@ -251,11 +251,14 @@ def inspect_brackets(matchobj):
     global counter
     global references
     global duplicate_ref
+    global appendix_find
     fullref = matchobj.group(0)
     brkts_rd_content = matchobj.group('rd')
     brkts_sq_content = matchobj.group('sq')
+    brkts_sq_digit = matchobj.group('sq_d')
     brkts_rd_spacemissing = matchobj.group('rd_word')
     brkts_sq_spacemissing = matchobj.group('sq_word')
+    brkts_sq_d_spacemissing = matchobj.group('sq_d_word')
     brkts_sq_quote = matchobj.group('sq_qu_quotes')
     brkts_sq_quopen = matchobj.group('sq_qu_open')
     brkts_sq_quclose = matchobj.group('sq_qu_close')
@@ -269,8 +272,16 @@ def inspect_brackets(matchobj):
         brkts_append = ' ' + brkts_rd_spacemissing
     elif brkts_sq_spacemissing is not None and brkts_sq_spacemissing is not '':
         brkts_append = ' ' + brkts_sq_spacemissing
+    elif brkts_sq_d_spacemissing is not None and brkts_sq_d_spacemissing is not '':
+        brkts_append = ' ' + brkts_sq_d_spacemissing
     else:
         brkts_append = ''
+
+    # save existing references into
+    if brkts_sq_digit is not None and appendix_find > 0:
+        for ref, no in oldreferences.items():
+            if brkts_sq_digit == no:
+                brkts_sq_content = ref
 
     # regex search found round brackets
     if brkts_rd_content is not None:
@@ -281,11 +292,8 @@ def inspect_brackets(matchobj):
         if url.scheme != '' and url.netloc != '':
             if brkts_rd_content in references:
                 refno = references[brkts_rd_content]
-                if brkts_rd_content not in duplicate_ref:
-                    # status msg
-                    print("::: Note: multiple occurrence of reference {}"
-                                .format(brkts_rd_content))
-                    duplicate_ref.append(brkts_rd_content)
+                print("Note: multiple occurrence of reference {}"
+                        .format(brkts_rd_content)) # status msg
             else:
                 counter += 1
                 refno = counter
@@ -309,11 +317,11 @@ def inspect_brackets(matchobj):
             #     print("warning, there already is a [1]")
             if brkts_sq_content in references:
                 refno = references[brkts_sq_content]
-                if brkts_sq_content not in duplicate_ref:
-                    # status msg
-                    print("::: Note: multiple occurrence of reference "
-                        "\"{}\"".format(brkts_sq_content))
+                if (brkts_sq_content not in duplicate_ref
+                        and brkts_sq_digit is None):
                     duplicate_ref.append(brkts_sq_content)
+                    print("Note: multiple occurrence of reference "
+                        "\"{}\"".format(brkts_sq_content)) # status msg
             else:
                 counter += 1
                 refno = counter
@@ -327,35 +335,33 @@ def inspect_brackets(matchobj):
 def parse_oldrefs(matchobj):
     """Parse existing references.
     """
+    global oldreferences
     fullref = matchobj.group(0)
-    oldno = matchobj.group(1)
-    oldref = matchobj.group(2)
+    no = matchobj.group(1)
+    ref = matchobj.group(2)
 
-    if oldref is not None and oldref is not '':
-        appendix_old[oldref] = oldno
-        print(oldref)
-        return oldref
-    else:
-        print("not found")
-        return fullref
+    if ref is not None and ref is not '':
+        oldreferences[ref] = no
+        return ''
 
-
-def old_refs(sourcefile):
+def old_refs(sourcefile, line_no=0):
     """Incorporate existing references into a new appendix.
     """
-    findapp = 0
-    # with open(sourcefile, 'r', encoding='utf-8') as f:
+    global appendix_find
+    linecount = 0
+    # look for an existing appendix in the source file
     for line in sourcefile:
+        linecount += 1
         # appendix found
         if line == '___\n':
-            findapp = 1
-            # status msg
-            print("Old appendix found!")
-        if findapp == 1:
-            oldref = re.sub('\[(\d+)\] *(.+)', parse_oldrefs, line)
+            appendix_find = linecount
+            print("Old appendix found.") # status msg
+        if appendix_find > 0:
+            the_refs = re.sub('\[(\d+)\] *(.+)\n', parse_oldrefs, line)
 
-    if findapp == 1:
-        print(appendix_old)
+    # 'merge' the two dictionaries
+    if appendix_find == 0:
+        print("::: Attn: old appendix not found!") # status msg
 
 # parse and interpret any command line arguments received
 parser = argparse.ArgumentParser(
@@ -413,7 +419,8 @@ args = parser.parse_args()
 # add counter for references
 # add counter for e-mail signature
 references = OrderedDict()
-appendix_old = OrderedDict()
+oldreferences = OrderedDict()
+appendix_find = 0
 duplicate_ref = []
 suffix = "_plaintext"
 counter = 0
@@ -442,8 +449,7 @@ if __name__ == "__main__":
     fileroot, extension = os.path.splitext(filename)
     # check for file root and extension
     if extension == '':
-        # status msg
-        print("::: Attn: the provided file has no file extension.")
+        print("::: Attn: the provided file has no file extension.") # status msg
         separator = ''
     else:
         separator = "."
@@ -466,8 +472,7 @@ if __name__ == "__main__":
             else:
                 print("Reading input file...")
             if extension == 'htm' or extension == 'html':
-                # status msg
-                print("Converting HTML to plaintext...")
+                print("Converting HTML to plaintext...") # status msg
                 # read in html file as one string
                 # and split at user-provided tag or string if present
                 html_string = f.read()
@@ -484,9 +489,8 @@ if __name__ == "__main__":
                             parsestring = html_split[1]
                         html_stripped = html_to_text(parsestring)
                     else:
-                        # status msg
                         print("::: Attn: the starting point \"" + beginparse
-                            + "\" for parsing was not found.")
+                            + "\" for parsing was not found.") # status msg
                         html_stripped = html_to_text(html_split[0])
                 else:
                     html_stripped = html_to_text(html_string)
@@ -497,55 +501,63 @@ if __name__ == "__main__":
                 # don't create any footnotes if --noref flag is set
                 # (only converts html to plaintext)
                 if args.noref:
-                    # status msg
-                    print("DONE.")
+                    print("DONE.") # status msg
                     print("The output file is: {}" .format(fout.name))
                     sys.exit()
 
             # actual conversion of refs
             with open(filename_out, 'w+', encoding='utf-8') as fout:
+                countlines = 0
+                countrefs = 0
                 if extension == 'html' or extension == 'htm':
                     source = html_stripped_lines
                 else:
                     source = f
                 # find old appendix on -r, --re-index flag
                 if (args.reindex):
-                    # status message
-                    print("Looking for existing appendix...")
+                    print("Looking for existing appendix...") # status msg
                     old_refs(source)
-                    # status msg
-                    print("Looking for new references...")
+                    if oldreferences:
+                        countrefs = len(oldreferences)
+                    print("Looking for new references...") # status msg
                 else:
-                    # status msg
-                    print("Looking for references...")
+                    print("Looking for references...") # status msg
                 # iterate over all lines
                 for line in source:
+                    countlines += 1
                     # if the current line does not mark an e-mail signature
                     if line != '--\n':
                         # search lines and substitute text using regex:
                         # find all round and square brackets
                         # find square brackets within quotes
+
                         line_out = re.sub(""
                             "(?#check for round brackets)"
                             "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])(?P<rd_word>\w*)"
                             "|(?#check for square brackets inside quotation marks)"
                             "(?P<sq_qu_open>([“]|[\"]))(?P<sq_qu_quotes>([^\"“”[]*)([\[])([^\"“”\]]+)([\]])([^“”\"]*))(?P<sq_qu_close>([”]|[\"]))"
+                            "|(?#check for existing references)"
+                            "([ ]*[\[])(?P<sq_d>\d+)([\]])(?P<sq_d_word>\w*)"
                             "|(?#check for square brackets)"
                             "([ ]*[\[])(?P<sq>[^\[\]]*)([\]])(?P<sq_word>\w*)",
                                 inspect_brackets, line)
-                        # write back all lines (changed or unchanged)
-                        fout.write(line_out)
+
+                        # write back all lines except for old appendix
+                        if (countlines >= appendix_find
+                                and countlines <= (appendix_find + countrefs)):
+                            fout.write('')
+                        else:
+                            fout.write(line_out)
+
                     # include appendix before e-mail signature
                     # if the current line marks such a signature (--)
                     else:
                         signature = 1
                         if len(references) > 0:
                             write_appendix()
-                            # status msg
-                            print("Appendix created.")
+                            print("Appendix created.") # status msg
                         else:
-                            # status msg
-                            print("No references found.")
+                            print("No references found.") # status msg
                         try:
                             fout.write('\n' +line)
                         except:
@@ -557,13 +569,10 @@ if __name__ == "__main__":
                     except:
                         fout.write(u'\n\n')
                     write_appendix()
-                    # status msg
-                    print("Appendix created.")
+                    print("Appendix created.") # status msg
                 if len(references) <= 0:
-                    # status msg
-                    print("No references found.")
-                # status msg
-                print("DONE.")
-                print("The output file is: {}" .format(fout.name))
+                    print("No references found.") # status msg
+                print("DONE.") # status msg
+                print("The output file is: {}" .format(fout.name)) # status msg
     else:
         sys.exit("File size must be below 2MB.")
