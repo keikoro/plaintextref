@@ -21,6 +21,7 @@
 # - ignore or warn on square brackets containing only digits
 #   as these might already be footnotes
 #   (possibly then check for appendix, integrate existing footnotes via cli option)
+# - todo support for images
 
 # Python2
 from __future__ import unicode_literals
@@ -74,9 +75,9 @@ class HTMLClean(HTMLParser):
                 if attr[0] == 'href':
                     the_url = attr[1].strip()
                     url = urlparse(the_url)
-                    if url.scheme != '' and url.netloc != '':
-                        self.urls.append(the_url)
-                        self.result.append(the_url)
+                    # all URLs get saved
+                    self.urls.append(the_url)
+                    self.result.append(the_url)
 
     def handle_data(self, data):
         """Add content enclosed within various HTML tags.
@@ -136,6 +137,9 @@ class HTMLClean(HTMLParser):
                     if url.scheme != '' and url.netloc != '':
                         self.result.append(descriptions_collected)
                         self.result.append(" (" + last_url + ")")
+                    else:
+                        self.result.append(descriptions_collected)
+
         # remove any data that was inside <script> or <style> tags
         if (tag == "script" or tag
                 == "style") and len(self.result) >= 1:
