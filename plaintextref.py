@@ -1,27 +1,29 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Convert in-text references to sequentially numbered footnotes and
-# change text-based files (like HTML) to proper plaintext in the process.
-#
-# Copyright (c) 2015 K Kollmann <code∆k.kollmann·moe>
-# License: http://opensource.org/licenses/MIT The MIT License (MIT)
+'''
+Convert in-text references to sequentially numbered footnotes and
+change text-based files (like HTML) to proper plaintext in the process.
 
-# Usage:
-# Use -h or --help for help on how to use the program.
-#
-# The script currently supports conversion of text and HTML files.
-# Round brackets containing URLs and square brackets get converted
-# to footnotes. Round brackets containing other text (including any nested
-# brackets) and square brackets within quotes to denote changes to
-# original citations as well as [sic] and [sic!] are ignored.
-#
-# TODO:
-# - option to re-index an existing appendix / to combine old and new refs
-# - ignore or warn on square brackets containing only digits
-#   as these might already be footnotes
-#   (possibly then check for appendix, integrate existing footnotes via cli option)
-# - todo support for images
+Copyright (c) 2015 K Kollmann <code∆k.kollmann·moe>
+License: http://opensource.org/licenses/MIT The MIT License (MIT)
+
+Usage:
+Use -h or --help for help on how to use the program.
+
+The script currently supports conversion of text and HTML files.
+Round brackets containing URLs and square brackets get converted
+to footnotes. Round brackets containing other text (including any nested
+brackets) and square brackets within quotes to denote changes to
+original citations as well as [sic] and [sic!] are ignored.
+
+TODO:
+- option to re-index an existing appendix / to combine old and new refs
+- ignore or warn on square brackets containing only digits
+  as these might already be footnotes
+  (possibly then check for appendix, integrate existing footnotes via cli option)
+- todo support for images
+'''
 
 # Python2
 from __future__ import unicode_literals
