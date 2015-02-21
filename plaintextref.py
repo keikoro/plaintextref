@@ -370,8 +370,9 @@ def old_refs(sourcefile):
             if the_refs == '':
                 appendix_lines += 1
 
-    if appendix_find == 0:
-        print("::: Attn: old appendix not found!") # status msg
+    # NOTE: looking for old appendix is now default
+    # if appendix_find == 0:
+        # print("::: Attn: old appendix not found!") # status msg
 
 # parse and interpret any command line arguments received
 parser = argparse.ArgumentParser(
@@ -396,7 +397,7 @@ parser.add_argument('-b','--begin', dest="begin", metavar="\"TEXT\"",
 e.g. --begin \"<body>\",
 e.g. --b \"2 February 2015\"''')
 parser.add_argument('-c','--contain', dest="contain", action="store_true",
-    help = '''run argument -b containg the text provided;
+    help = '''run argument -b containing the text provided;
 by default, parsing begins only after the given string''')
 # parser.add_argument('-i','--images', dest="images", action="store_true",
 #     help = '''treat image files in <a></a> tags as part of the link description;
@@ -414,11 +415,12 @@ parser.add_argument('-p','--path', dest="path",
     help = '''path to save the converted file to if you do not want to
 save it in the same directory as the original file
 ''')
-parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
-    default="reindex",
-    help = '''if there are already footnotes and an appendix present,
-renumber existing references and incorporate them
-into a new appendix including both old and new references''')
+# NOTE: looking for old appendix is now default
+# parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
+#     default="reindex",
+#     help = '''if there are already footnotes and an appendix present,
+# renumber existing references and incorporate them
+# into a new appendix including both old and new references''')
 parser.add_argument('-n','--noref', dest="noref", action="store_true",
     help = '''convert the file to plaintext, but don't create an appendix;
 useful if you just want to strip HTML tags''')
@@ -525,20 +527,23 @@ if __name__ == "__main__":
                     source = html_stripped_lines
                 else:
                     source = f
+                # NOTE: looking for old appendix is now default
                 # find old appendix on -r, --re-index flag
-                if (args.reindex):
-                    print("Looking for existing appendix...") # status msg
-                    old_refs(source)
-                    # needs seek for text files
-                    # to 'reset' the source file to start of file!!!
-                    # does not work for html files
-                    try:
-                        source.seek(0,)
-                    except:
-                        pass
-                    print("Looking for new references...") # status msg
-                else:
-                    print("Looking for references...") # status msg
+                # if (args.reindex):
+                print("Looking for existing appendix...") # status msg
+                old_refs(source)
+                # needs seek for all proper files to 'reset' the source
+                # file to the beginning of the file!
+                # does not work for HTML files as these are lists of lines now
+                try:
+                    source.seek(0,)
+                except:
+                    pass
+                print("Looking for new references...") # status msg
+                # NOTE: looking for old appendix is now default
+                # else:
+                #     print("Looking for references...") # status msg
+
                 # iterate over all lines
                 for line in source:
                     countlines += 1
