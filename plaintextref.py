@@ -277,11 +277,12 @@ def inspect_brackets(matchobj):
     else:
         brkts_append = ''
 
-    # save existing references into
-    if brkts_sq_digit is not None and appendix_find > 0:
+    # use existing references if they were indeed part of old appendix
+    if brkts_sq_digit is not None:
         for ref, no in oldreferences.items():
             if brkts_sq_digit == no:
                 brkts_sq_content = ref
+                break
 
     # regex search found round brackets
     if brkts_rd_content is not None:
@@ -344,22 +345,28 @@ def parse_oldrefs(matchobj):
         oldreferences[ref] = no
         return ''
 
-def old_refs(sourcefile, line_no=0):
+def old_refs(sourcefile):
     """Incorporate existing references into a new appendix.
     """
     global appendix_find
+    global appendix_start
+    global appendix_lines
     linecount = 0
     # look for an existing appendix in the source file
     for line in sourcefile:
         linecount += 1
         # appendix found
         if line == '___\n':
-            appendix_find = linecount
+            appendix_find = 1
+            appendix_start = linecount
+            appendix_lines += 1
             print("Old appendix found.") # status msg
-        if appendix_find > 0:
+        # count all valid references
+        if appendix_find == 1:
             the_refs = re.sub('\[(\d+)\] *(.+)\n', parse_oldrefs, line)
+            if the_refs == '':
+                appendix_lines += 1
 
-    # 'merge' the two dictionaries
     if appendix_find == 0:
         print("::: Attn: old appendix not found!") # status msg
 
@@ -421,6 +428,8 @@ args = parser.parse_args()
 references = OrderedDict()
 oldreferences = OrderedDict()
 appendix_find = 0
+appendix_start = 0
+appendix_lines = 0
 duplicate_ref = []
 suffix = "_plaintext"
 counter = 0
@@ -461,6 +470,7 @@ if __name__ == "__main__":
         suffix = args.suffix
     if args.newname is not None and args.newname is not "":
         fileroot = args.newname
+        suffix = ''
     filename_out = newpath + fileroot + suffix + separator + extension
 
     # only allow files up to 1MB in size
@@ -504,11 +514,9 @@ if __name__ == "__main__":
                     print("DONE.") # status msg
                     print("The output file is: {}" .format(fout.name))
                     sys.exit()
-
             # actual conversion of refs
             with open(filename_out, 'w+', encoding='utf-8') as fout:
                 countlines = 0
-                countrefs = 0
                 if extension == 'html' or extension == 'htm':
                     source = html_stripped_lines
                 else:
@@ -517,8 +525,13 @@ if __name__ == "__main__":
                 if (args.reindex):
                     print("Looking for existing appendix...") # status msg
                     old_refs(source)
-                    if oldreferences:
-                        countrefs = len(oldreferences)
+                    # needs seek for text files
+                    # to 'reset' the source file to start of file!!!
+                    # does not work for html files
+                    try:
+                        source.seek(0,)
+                    except:
+                        pass
                     print("Looking for new references...") # status msg
                 else:
                     print("Looking for references...") # status msg
@@ -527,28 +540,26 @@ if __name__ == "__main__":
                     countlines += 1
                     # if the current line does not mark an e-mail signature
                     if line != '--\n':
+                        # skip lines that are part of old appendix
+                        if (appendix_find > 0 and countlines >= appendix_start
+                                and countlines <= (appendix_start + appendix_lines)):
+                            fout.write('')
+                        else:
                         # search lines and substitute text using regex:
                         # find all round and square brackets
                         # find square brackets within quotes
-
-                        line_out = re.sub(""
-                            "(?#check for round brackets)"
-                            "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])(?P<rd_word>\w*)"
-                            "|(?#check for square brackets inside quotation marks)"
-                            "(?P<sq_qu_open>([“]|[\"]))(?P<sq_qu_quotes>([^\"“”[]*)([\[])([^\"“”\]]+)([\]])([^“”\"]*))(?P<sq_qu_close>([”]|[\"]))"
-                            "|(?#check for existing references)"
-                            "([ ]*[\[])(?P<sq_d>\d+)([\]])(?P<sq_d_word>\w*)"
-                            "|(?#check for square brackets)"
-                            "([ ]*[\[])(?P<sq>[^\[\]]*)([\]])(?P<sq_word>\w*)",
-                                inspect_brackets, line)
-
-                        # write back all lines except for old appendix
-                        if (countlines >= appendix_find
-                                and countlines <= (appendix_find + countrefs)):
-                            fout.write('')
-                        else:
+                            line_out = re.sub(""
+                                "(?#check for round brackets)"
+                                "([ ]*[\(])(?P<rd>[^\(\)]*)([\)])(?P<rd_word>\w*)"
+                                "|(?#check for square brackets inside quotation marks)"
+                                "(?P<sq_qu_open>([“]|[\"]))(?P<sq_qu_quotes>([^\"“”[]*)([\[])([^\"“”\]]+)([\]])([^“”\"]*))(?P<sq_qu_close>([”]|[\"]))"
+                                "|(?#check for existing references)"
+                                "([ ]*[\[])(?P<sq_d>\d+)([\]])(?P<sq_d_word>\w*)"
+                                "|(?#check for square brackets)"
+                                "([ ]*[\[])(?P<sq>[^\[\]]*)([\]])(?P<sq_word>\w*)",
+                                    inspect_brackets, line)
+                            # write back all lines, changed or unchanged
                             fout.write(line_out)
-
                     # include appendix before e-mail signature
                     # if the current line marks such a signature (--)
                     else:
