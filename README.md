@@ -34,7 +34,10 @@ Another purpose of this program is the conversion of HTML-formatted e-mails or t
 
 Start the script by specifying which file you want to convert. The converted text is saved to a new file which, by default, has ```_plaintext``` appended to the original file name. Save location is the folder containing the original file or any other writable directory you specify.
 
-```$ python3 plaintextref.py myfile.txt```
+```$ python3 plaintextref.py myfile.txt``` or
+
+```$ python plaintextref.py myfile.txt```
+
 
 ... results in a new file called ```myfile_plaintext.txt```
 
