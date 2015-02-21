@@ -366,7 +366,7 @@ def old_refs(sourcefile):
             print("Old appendix found.") # status msg
         # count all valid references
         if appendix_find == 1:
-            the_refs = re.sub('\[(\d+)\] *(.+)\n', parse_oldrefs, line)
+            the_refs = re.sub('\[(\d+)\] *(.+)\n*', parse_oldrefs, line)
             if the_refs == '':
                 appendix_lines += 1
 
