@@ -331,6 +331,9 @@ def inspect_brackets(matchobj):
             return ref
     # regex search did not find any brackets
     else:
+        # delete in-text ref that do not belong to footnotes in old appendix
+        if brkts_sq_digit is not None and brkts_sq_content is None:
+            return ''
         return fullref
 
 def parse_oldrefs(matchobj):
@@ -412,6 +415,7 @@ parser.add_argument('-p','--path', dest="path",
 save it in the same directory as the original file
 ''')
 parser.add_argument('-r','--re-index', dest="reindex", action="store_true",
+    default="reindex",
     help = '''if there are already footnotes and an appendix present,
 renumber existing references and incorporate them
 into a new appendix including both old and new references''')
